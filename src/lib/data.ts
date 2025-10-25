@@ -403,6 +403,56 @@ export const getFormattedLockedPercentage = (coin1: string, coin2: string): stri
   return `${data.lockedPercentage}%`;
 };
 
+// ===== TRADING PAIR CHART DATA =====
+export const getTradingPairChartData = (fromCoinId: string, toCoinId: string): ChartDataPoint[] => {
+  
+  let baseCoinId = fromCoinId;
+  if (fromCoinId === 'usdc') {
+    baseCoinId = toCoinId;
+  }
+  
+  const baseCoin = getCoinById(baseCoinId);
+  const usdcCoin = getCoinById('usdc');
+  
+  if (!baseCoin || !usdcCoin) {
+    return [];
+  }
+  
+  const baseData = baseCoin.chartData;
+  const usdcData = usdcCoin.chartData;
+  
+  // Calculate base coin price in USDC
+  const pairData: ChartDataPoint[] = [];
+  
+  for (let i = 0; i < Math.min(baseData.length, usdcData.length); i++) {
+    // Calculate how much USDC you need to buy 1 unit of base coin
+    const priceInUsdc = baseData[i].value / usdcData[i].value;
+    pairData.push({
+      time: baseData[i].time,
+      value: priceInUsdc
+    });
+  }
+  
+  return pairData;
+};
+
+// ===== CHART HEADER HELPER =====
+export const getChartHeaderInfo = (fromCoinId: string, toCoinId: string): { baseCoin: Coin | undefined, baseSymbol: string, quoteSymbol: string } => {
+  // Determine base coin (non-USDC coin)
+  let baseCoinId = fromCoinId;
+  if (fromCoinId === 'usdc') {
+    baseCoinId = toCoinId;
+  }
+  
+  const baseCoin = getCoinById(baseCoinId);
+  
+  return {
+    baseCoin,
+    baseSymbol: baseCoin?.symbol || '',
+    quoteSymbol: 'USDC'
+  };
+};
+
 export const getPooledAmount = (coin1: string, coin2: string, targetCoin: string): number => {
   const data = getLiquidityPoolData(coin1, coin2);
   

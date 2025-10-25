@@ -6,7 +6,12 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import Navbar from "@/components/Global/Navbar";
 import Footer from "@/components/Global/Footer";
-import { getAllCoins, getCoinById } from "@/lib/data";
+import {
+  getAllCoins,
+  getCoinById,
+  getTradingPairChartData,
+  getChartHeaderInfo,
+} from "@/lib/data";
 
 // Slippage Tolerance Popup Component
 const SlippageTolerancePopup = ({
@@ -441,6 +446,7 @@ export default function SwapPage() {
 
   const fromCoinData = getCoinById(fromCoin);
   const toCoinData = getCoinById(toCoin);
+  const chartHeaderInfo = getChartHeaderInfo(fromCoin, toCoin);
 
   const handleSwapCoins = () => {
     const tempCoin = fromCoin;
@@ -524,20 +530,21 @@ export default function SwapPage() {
                       <div className="swap-pair-wrapper">
                         <div className="icons-wrapper">
                           <img
-                            src={fromCoinData?.icon}
+                            src={chartHeaderInfo.baseCoin?.icon}
                             loading="lazy"
-                            alt="From Coin"
+                            alt="Base Coin"
                             className="icon-1"
                           />
                           <img
-                            src={toCoinData?.icon}
+                            src="/assets/usdc.png"
                             loading="lazy"
-                            alt="To Coin"
+                            alt="USDC"
                             className="icon-2"
                           />
                         </div>
                         <span className="text-dark text-medium">
-                          {fromCoinData?.symbol} / {toCoinData?.symbol}
+                          {chartHeaderInfo.baseSymbol} /{" "}
+                          {chartHeaderInfo.quoteSymbol}
                         </span>
                       </div>
                       <img
@@ -552,7 +559,7 @@ export default function SwapPage() {
                     </div>
                     <div className="swap-chart-wrapper">
                       <TradingChart
-                        data={fromCoinData?.chartData || []}
+                        data={getTradingPairChartData(fromCoin, toCoin)}
                         height={300}
                       />
                     </div>
