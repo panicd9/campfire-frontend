@@ -45,7 +45,7 @@ export interface FundingPool {
 
 export const fundingPools: FundingPool[] = [
   {
-    id: "1",
+    id: "0",
     name: "Wind Farm - Single Income",
     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt",
     location: "Galway, Ireland",
@@ -54,10 +54,9 @@ export const fundingPools: FundingPool[] = [
     fundingTarget: 6000000,
     fundingRaised: 5400000,
     fundingProgress: 90,
-    currency: "EURC",
+    currency: "USDC",
     features: [
       "15MW of Commercial Wind",
-      "15MW of Commercial Wind"
     ],
     team: [
       { name: "John Doe", role: "CEO & Founder", image: "/assets/683468326de746c20d499e7a7aebf413_163.svg" },
@@ -113,7 +112,7 @@ export const fundingPools: FundingPool[] = [
     }
   },
   {
-    id: "2",
+    id: "1",
     name: "Solar Farm - Green Energy",
     description: "Advanced solar energy project with cutting-edge technology",
     location: "Madrid, Spain",
@@ -122,7 +121,7 @@ export const fundingPools: FundingPool[] = [
     fundingTarget: 8000000,
     fundingRaised: 6400000,
     fundingProgress: 80,
-    currency: "EURC",
+    currency: "USDC",
     features: [
       "50MW Solar Installation",
       "Battery Storage System"

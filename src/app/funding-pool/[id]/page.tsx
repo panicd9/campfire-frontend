@@ -8,6 +8,23 @@ import { useState, use } from "react";
 import { getFundingPoolById } from "@/lib/fundingPools";
 import { getCoinById } from "@/lib/data";
 import Image from "next/image";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { BN, utils } from "@coral-xyz/anchor";
+import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
+  createAssociatedTokenAccountInstruction,
+  getAssociatedTokenAddressSync,
+  getMint,
+} from "@solana/spl-token";
+import {
+  PublicKey,
+  SystemProgram,
+  TransactionInstruction,
+} from "@solana/web3.js";
+import { useCrowdfundingProgram } from "../../../../solana/crowdfunding/useCrowdfundingProgram";
+import { amountToRawAmount, shortenSignature } from "../../../../solana/utils";
 
 interface FundingPoolPageProps {
   params: Promise<{
@@ -22,9 +39,140 @@ export default function FundingPoolDetailPage({
   const [initialInvestment, setInitialInvestment] = useState(100);
   const [investmentDuration, setInvestmentDuration] = useState(100);
   const [depositAmount, setDepositAmount] = useState("");
+  const [isDepositing, setIsDepositing] = useState(false);
+  const [depositError, setDepositError] = useState<string | null>(null);
+  const [depositSignature, setDepositSignature] = useState<string | null>(
+    null,
+  );
   const resolvedParams = use(params);
+  const { program, provider } = useCrowdfundingProgram();
+  const { connected, publicKey } = useWallet();
+  const { setVisible } = useWalletModal();
   const pool = getFundingPoolById(resolvedParams.id);
   const usdcCoin = getCoinById("usdc");
+
+  const handleDeposit = async () => {
+    if (!connected || !publicKey) {
+      setDepositError("Connect your wallet to deposit.");
+      setDepositSignature(null);
+      setVisible(true);
+      return;
+    }
+
+    if (!program || !provider) {
+      setDepositError("Wallet provider is not ready. Please reconnect and try again.");
+      return;
+    }
+
+    const poolIdString = resolvedParams.id;
+
+    if (!/^\d+$/.test(poolIdString)) {
+      setDepositError("Invalid funding pool identifier.");
+      return;
+    }
+
+    const rawInput = depositAmount.trim();
+
+    if (!rawInput) {
+      setDepositError("Enter an amount to deposit.");
+      return;
+    }
+
+    setIsDepositing(true);
+    setDepositError(null);
+    setDepositSignature(null);
+
+    try {
+      const poolId = new BN(poolIdString);
+      const poolIdSeed = poolId.toArrayLike(Uint8Array, "le", 8);
+      const poolSeed = utils.bytes.utf8.encode("pool");
+      const poolAuthoritySeed = utils.bytes.utf8.encode("pool-authority");
+      const depositorInfoSeed = utils.bytes.utf8.encode("depositor-info");
+
+      const [poolPda] = PublicKey.findProgramAddressSync(
+        [poolSeed, poolIdSeed],
+        program.programId,
+      );
+
+      const [poolAuthority] = PublicKey.findProgramAddressSync(
+        [poolAuthoritySeed, poolIdSeed],
+        program.programId,
+      );
+
+      const [depositorInfo] = PublicKey.findProgramAddressSync(
+        [depositorInfoSeed, publicKey.toBytes(), poolIdSeed],
+        program.programId,
+      );
+
+      const poolAccount = await program.account.fundingPool.fetch(poolPda);
+      const depositMintPublicKey = new PublicKey(poolAccount.depositMint);
+
+      const mintInfo = await getMint(provider.connection, depositMintPublicKey);
+      const rawAmount = amountToRawAmount(rawInput, mintInfo.decimals);
+
+      const depositVaultAta = getAssociatedTokenAddressSync(
+        depositMintPublicKey,
+        poolAuthority,
+        true,
+      );
+
+      const userDepositAta = getAssociatedTokenAddressSync(
+        depositMintPublicKey,
+        publicKey,
+      );
+
+      const instructions: TransactionInstruction[] = [];
+
+      const userAtaInfo = await provider.connection.getAccountInfo(
+        userDepositAta,
+      );
+
+      if (!userAtaInfo) {
+        instructions.push(
+          createAssociatedTokenAccountInstruction(
+            publicKey,
+            userDepositAta,
+            publicKey,
+            depositMintPublicKey,
+          ),
+        );
+      }
+
+      const method = program.methods
+        .deposit(poolId, rawAmount)
+        .accountsStrict({
+          user: publicKey,
+          pool: poolPda,
+          poolAuthority,
+          depositVault: depositVaultAta,
+          userDepositAta,
+          depositorInfo,
+          systemProgram: SystemProgram.programId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        });
+
+      if (instructions.length > 0) {
+        method.preInstructions(instructions);
+      }
+
+      const signature = await method.rpc();
+
+      setDepositSignature(signature);
+      setDepositAmount("");
+    } catch (error) {
+      console.error("Deposit failed", error);
+      let message = "Deposit failed. Please try again.";
+
+      if (error instanceof Error && error.message) {
+        message = error.message;
+      }
+
+      setDepositError(message);
+    } finally {
+      setIsDepositing(false);
+    }
+  };
 
   if (!pool) {
     return (
@@ -276,16 +424,26 @@ export default function FundingPoolDetailPage({
                               step="0.01"
                               min="1"
                               value={depositAmount}
-                              onChange={(e) => setDepositAmount(e.target.value)}
+                              onChange={(e) => {
+                                setDepositAmount(e.target.value);
+                                if (depositError) {
+                                  setDepositError(null);
+                                }
+                                if (depositSignature) {
+                                  setDepositSignature(null);
+                                }
+                              }}
                               placeholder="0.00"
                               className="invest-amount-input"
                             />
                             <div className="coin-selector-invest">
                               <div className="coin-icon-wrapper">
-                                <img
+                                <Image
                                   src={usdcCoin?.icon || "/assets/usdc.png"}
                                   alt="USDC"
                                   className="coin-icon-img"
+                                  width={24}
+                                  height={24}
                                 />
                               </div>
                               <span className="coin-symbol">USDC</span>
@@ -298,9 +456,33 @@ export default function FundingPoolDetailPage({
                           </div>
                         </div>
 
-                        <button className="deposit-button bg-linear-green">
-                          Deposit
+                        <button
+                          type="button"
+                          className="deposit-button bg-linear-green"
+                          onClick={handleDeposit}
+                          disabled={
+                            isDepositing || (connected && depositAmount.trim() === "")
+                          }
+                        >
+                          {connected
+                            ? isDepositing
+                              ? "Depositing..."
+                              : "Deposit"
+                            : "Connect Wallet"}
                         </button>
+                        {depositError && (
+                          <p
+                            className="text-12 text-medium"
+                            style={{ color: "#DC2626", marginTop: "0.5rem" }}
+                          >
+                            {depositError}
+                          </p>
+                        )}
+                        {depositSignature && (
+                          <p className="text-12 text-medium" style={{ marginTop: "0.5rem" }}>
+                            Deposit submitted. Signature: {shortenSignature(depositSignature)}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
