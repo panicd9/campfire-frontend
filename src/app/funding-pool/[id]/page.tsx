@@ -53,6 +53,8 @@ export default function FundingPoolDetailPage({
   const [depositSignature, setDepositSignature] = useState<string | null>(
     null,
   );
+  const [userDepositBalance, setUserDepositBalance] = useState("0.000000");
+  const [isBalanceLoading, setIsBalanceLoading] = useState(false);
   const [pool, setPool] = useState<FundingPool | null>(null);
   const [isLoadingPool, setIsLoadingPool] = useState(true);
   const [poolError, setPoolError] = useState<string | null>(null);
@@ -99,6 +101,106 @@ export default function FundingPoolDetailPage({
       isActive = false;
     };
   }, [resolvedParams.id]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchUserBalance = async () => {
+      if (!connected || !publicKey || !program || !provider) {
+        if (isActive) {
+          setUserDepositBalance("0.000000");
+        }
+        return;
+      }
+
+      if (!pool) {
+        if (isActive) {
+          setUserDepositBalance("0.000000");
+        }
+        return;
+      }
+
+      const poolIdString = resolvedParams.id;
+
+      if (!/^\d+$/.test(poolIdString)) {
+        if (isActive) {
+          setUserDepositBalance("0.000000");
+        }
+        return;
+      }
+
+      setIsBalanceLoading(true);
+
+      try {
+        const poolId = new BN(poolIdString);
+        const poolIdSeed = poolId.toArrayLike(Uint8Array, "le", 8);
+        const poolSeed = utils.bytes.utf8.encode("pool");
+
+        let depositMintPublicKey: PublicKey;
+
+        if (pool.chainData?.depositMint) {
+          depositMintPublicKey = new PublicKey(pool.chainData.depositMint);
+        } else {
+          const [poolPda] = PublicKey.findProgramAddressSync(
+            [poolSeed, poolIdSeed],
+            program.programId,
+          );
+
+          const onChainPool = await program.account.fundingPool.fetch(poolPda);
+          depositMintPublicKey = new PublicKey(onChainPool.depositMint);
+        }
+
+        const userDepositAta = getAssociatedTokenAddressSync(
+          depositMintPublicKey,
+          publicKey,
+        );
+
+        const userAtaInfo = await provider.connection.getAccountInfo(
+          userDepositAta,
+        );
+
+        if (!userAtaInfo) {
+          if (isActive) {
+            setUserDepositBalance("0.000000");
+          }
+          return;
+        }
+
+        const tokenBalance = await provider.connection.getTokenAccountBalance(
+          userDepositAta,
+        );
+
+        if (!isActive) {
+          return;
+        }
+
+        const decimals = tokenBalance.value.decimals;
+        const formatted = parseTokenAmountUI(
+          new BN(tokenBalance.value.amount),
+          decimals,
+          2,
+        );
+
+        setUserDepositBalance(formatted);
+      } catch (error) {
+        console.error("Failed to fetch deposit balance", error);
+
+        if (isActive) {
+          setUserDepositBalance("0.000000");
+        }
+      } finally {
+        if (isActive) {
+          setIsBalanceLoading(false);
+        }
+      }
+    };
+
+    void fetchUserBalance();
+
+    return () => {
+      isActive = false;
+    };
+  }, [connected, publicKey, program, provider, resolvedParams.id, pool]);
 
   if (isLoadingPool) {
     return (
@@ -219,6 +321,8 @@ export default function FundingPoolDetailPage({
           ),
         );
       }
+
+      console.log("Depositing raw amount:", rawAmount.toString());
 
       const method = program.methods
         .deposit(poolId, rawAmount)
@@ -578,10 +682,12 @@ export default function FundingPoolDetailPage({
                                 />
                                 <div className="coin-selector-invest">
                                   <div className="coin-icon-wrapper">
-                                    <img
+                                    <Image
                                       src={usdcCoin?.icon || "/assets/usdc.png"}
                                       alt="USDC"
                                       className="coin-icon-img"
+                                      width={24}
+                                      height={24}
                                     />
                                   </div>
                                   <span className="coin-symbol">USDC</span>
@@ -590,7 +696,11 @@ export default function FundingPoolDetailPage({
 
                               <div className="balance-info">
                                 <span className="balance-text">
-                                  0.000000 USDC
+                                  {connected
+                                    ? isBalanceLoading
+                                      ? "Loading balance..."
+                                      : `${userDepositBalance} ${usdcCoin?.symbol ?? "USDC"}`
+                                    : "0.000000 USDC"}
                                 </span>
                                 <button className="max-button">Max</button>
                               </div>
@@ -670,10 +780,12 @@ export default function FundingPoolDetailPage({
                                 />
                                 <div className="coin-selector-invest">
                                   <div className="coin-icon-wrapper">
-                                    <img
+                                    <Image
                                       src={usdcCoin?.icon || "/assets/usdc.png"}
                                       alt="USDC"
                                       className="coin-icon-img"
+                                      width={24}
+                                      height={24}
                                     />
                                   </div>
                                   <span className="coin-symbol">USDC</span>
@@ -692,10 +804,12 @@ export default function FundingPoolDetailPage({
                               className="deposit-button bg-linear-green claim-button-disabled"
                               disabled
                             >
-                              <img
+                              <Image
                                 src="/assets/Locked.svg"
                                 alt="Locked"
                                 className="claim-button-icon"
+                                width={16}
+                                height={16}
                               />
                               Claim (Locked)
                             </button>
