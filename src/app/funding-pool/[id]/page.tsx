@@ -288,16 +288,16 @@ export default function FundingPoolDetailPage({
 
   const poolProgress =
     poolDepositLimit &&
-    poolTotalDeposited &&
-    !poolDepositLimit.isZero()
+      poolTotalDeposited &&
+      !poolDepositLimit.isZero()
       ? (Number(
-          poolTotalDeposited
-            .mul(PRECISSION_BN)
-            .div(poolDepositLimit)
-            .toString(),
-        ) /
-          PRECISION) *
-        100
+        poolTotalDeposited
+          .mul(PRECISSION_BN)
+          .div(poolDepositLimit)
+          .toString(),
+      ) /
+        PRECISION) *
+      100
       : pool.fundingProgress;
 
   const progressPercentage = Math.max(0, Math.min(100, poolProgress));
@@ -336,9 +336,8 @@ export default function FundingPoolDetailPage({
                         {tabs.map((tab) => (
                           <span
                             key={tab}
-                            className={`asset-tab-link ${
-                              activeTab === tab ? "asset-tab-active" : ""
-                            }`}
+                            className={`asset-tab-link ${activeTab === tab ? "asset-tab-active" : ""
+                              }`}
                             onClick={() => setActiveTab(tab)}
                             style={{ cursor: "pointer" }}
                           >
@@ -529,22 +528,20 @@ export default function FundingPoolDetailPage({
                         <div className="invest-header">
                           <div className="invest-tabs">
                             <span
-                              className={`invest-tab ${
-                                activeInvestTab === "Invest"
-                                  ? "invest-tab-active"
-                                  : ""
-                              }`}
+                              className={`invest-tab ${activeInvestTab === "Invest"
+                                ? "invest-tab-active"
+                                : ""
+                                }`}
                               onClick={() => setActiveInvestTab("Invest")}
                               style={{ cursor: "pointer" }}
                             >
                               Invest
                             </span>
                             <span
-                              className={`invest-tab ${
-                                activeInvestTab === "Claim"
-                                  ? "invest-tab-active"
-                                  : ""
-                              }`}
+                              className={`invest-tab ${activeInvestTab === "Claim"
+                                ? "invest-tab-active"
+                                : ""
+                                }`}
                               onClick={() => setActiveInvestTab("Claim")}
                               style={{ cursor: "pointer" }}
                             >
@@ -567,15 +564,15 @@ export default function FundingPoolDetailPage({
                                   step="0.01"
                                   min="1"
                                   value={depositAmount}
-                                                                onChange={(e) => {
-                                setDepositAmount(e.target.value);
-                                if (depositError) {
-                                  setDepositError(null);
-                                }
-                                if (depositSignature) {
-                                  setDepositSignature(null);
-                                }
-                              }}
+                                  onChange={(e) => {
+                                    setDepositAmount(e.target.value);
+                                    if (depositError) {
+                                      setDepositError(null);
+                                    }
+                                    if (depositSignature) {
+                                      setDepositSignature(null);
+                                    }
+                                  }}
                                   placeholder="0.00"
                                   className="invest-amount-input"
                                 />
@@ -599,9 +596,33 @@ export default function FundingPoolDetailPage({
                               </div>
                             </div>
 
-                            <button className="deposit-button bg-linear-green">
-                              Deposit
+                            <button
+                              type="button"
+                              className="deposit-button bg-linear-green"
+                              onClick={handleDeposit}
+                              disabled={
+                                isDepositing || (connected && depositAmount.trim() === "")
+                              }
+                            >
+                              {connected
+                                ? isDepositing
+                                  ? "Depositing..."
+                                  : "Deposit"
+                                : "Connect Wallet"}
                             </button>
+                            {depositError && (
+                              <p
+                                className="text-12 text-medium"
+                                style={{ color: "#DC2626", marginTop: "0.5rem" }}
+                              >
+                                {depositError}
+                              </p>
+                            )}
+                            {depositSignature && (
+                              <p className="text-12 text-medium" style={{ marginTop: "0.5rem" }}>
+                                Deposit submitted. Signature: {shortenSignature(depositSignature)}
+                              </p>
+                            )}
                           </>
                         )}
 
