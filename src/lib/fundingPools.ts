@@ -1,4 +1,21 @@
+import * as anchor from "@coral-xyz/anchor";
+import { Connection, PublicKey } from "@solana/web3.js";
+import { Crowdfunding, CrowdfundingIDL } from "../../solana/crowdfunding/crowdfunding-exports";
+import { BN, Program } from "@coral-xyz/anchor";
+
 export interface FundingPool {
+  chainData?: {
+    id: anchor.BN;
+    creator: anchor.web3.PublicKey;
+    depositMint: anchor.web3.PublicKey;
+    depositVault: anchor.web3.PublicKey;
+    depositLimit: anchor.BN;
+    totalDeposited: anchor.BN;
+    issued: boolean;
+    rwaMint: anchor.web3.PublicKey;
+    rwaVault: anchor.web3.PublicKey;
+    rwaTotalSupply: anchor.BN;
+  };
   id: string;
   name: string;
   description: string;
@@ -112,6 +129,18 @@ export const fundingPools: FundingPool[] = [
     }
   },
   {
+    chainData: {
+      id: new BN(1),
+      creator: new PublicKey("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"),
+      depositMint: new PublicKey("So11111111111111111111111111111111111111112"),
+      depositVault: new PublicKey("4Nd1mY7bG3t6b8v4Y6SLD1d2nQ8V5Zc4U5r7h6v3KJ8o"),
+      depositLimit: new BN(130_000 * 10**6),
+      totalDeposited: new BN(130_000 * 10**6),
+      issued: true,
+      rwaMint: new PublicKey("3Nd1mY7bG3t6b8v4Y6SLD1d2nQ8V5Zc4U5r7h6v3KJ8o"),
+      rwaVault: new PublicKey("5Nd1mY7bG3t6b8v4Y6SLD1d2nQ8V5Zc4U5r7h6v3KJ8o"),
+      rwaTotalSupply: new BN(1_000_000 * 10**6),
+    },
     id: "1",
     name: "Solar Farm - Green Energy",
     description: "Advanced solar energy project with cutting-edge technology",
@@ -165,10 +194,30 @@ export const fundingPools: FundingPool[] = [
   }
 ];
 
-export function getFundingPoolById(id: string): FundingPool | undefined {
-  return fundingPools.find(pool => pool.id === id);
+export async function getFundingPoolById(id: string): Promise<FundingPool | undefined> {
+  return (await getAllFundingPools()).find(pool => pool.id === id);
 }
 
-export function getAllFundingPools(): FundingPool[] {
+export const u64LE = (value: number | bigint) => {
+  const buf = new ArrayBuffer(8);
+  const view = new DataView(buf);
+  view.setBigUint64(0, BigInt(value), true); // true = little-endian
+  return new Uint8Array(buf);
+};
+
+export async function getAllFundingPools(): Promise<FundingPool[]> {
+  const connection = new Connection("http://127.0.0.1:8899");
+  const program: Program<Crowdfunding> = new anchor.Program(CrowdfundingIDL, { connection });
+
+  const [pool0Pda] = PublicKey.findProgramAddressSync(
+    [Buffer.from("pool"), u64LE(0)],
+    program.programId,
+  );
+
+  const pool = await program.account.fundingPool.fetch(pool0Pda);
+
+  const demoFundingPools = [...fundingPools];
+  demoFundingPools[0].chainData = pool;
+
   return fundingPools;
 }

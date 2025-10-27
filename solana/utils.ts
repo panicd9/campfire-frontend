@@ -1,5 +1,8 @@
 import { BN } from "@coral-xyz/anchor";
 
+export const PRECISION = 10 ** 9;
+export const PRECISSION_BN = new BN(PRECISION);
+
 /**
  * Converts a decimal string amount into a raw integer amount respecting the token decimals.
  */
@@ -33,6 +36,30 @@ export function amountToRawAmount(value: string, decimals: number): BN {
   }
 
   return total;
+}
+
+export function parseTokenAmountUI(
+  rawAmount: BN,
+  decimals: number = 6,
+  displayDecimals: number = 2
+): string {
+  const base = new BN(10).pow(new BN(decimals));
+  const wholePartBN = rawAmount.div(base);
+  const fractionalPartBN = rawAmount.mod(base);
+
+  // Convert fractional part to string with leading zeros
+  let fractionalPart = fractionalPartBN.toString().padStart(decimals, "0");
+
+  // Trim fractional digits for display
+  if (displayDecimals < decimals) {
+    fractionalPart = fractionalPart.slice(0, displayDecimals);
+  }
+
+  // Convert whole part to string with comma separators
+  const wholePart = Number(wholePartBN.toString()).toLocaleString("en-US");
+
+  // If displayDecimals = 0, return only the whole part
+  return displayDecimals > 0 ? `${wholePart}.${fractionalPart}` : wholePart;
 }
 
 /**

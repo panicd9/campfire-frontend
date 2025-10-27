@@ -4,8 +4,9 @@ import Navbar from "@/components/Global/Navbar";
 import Footer from "@/components/Global/Footer";
 import ProgressBar from "@/components/Global/ProgressBar";
 import RangeSlider from "@/components/Global/RangeSlider";
-import { useState, use } from "react";
+import { useState, use, useEffect } from "react";
 import { getFundingPoolById } from "@/lib/fundingPools";
+import type { FundingPool } from "@/lib/fundingPools";
 import { getCoinById } from "@/lib/data";
 import Image from "next/image";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -24,7 +25,13 @@ import {
   TransactionInstruction,
 } from "@solana/web3.js";
 import { useCrowdfundingProgram } from "../../../../solana/crowdfunding/useCrowdfundingProgram";
-import { amountToRawAmount, shortenSignature } from "../../../../solana/utils";
+import {
+  PRECISION,
+  PRECISSION_BN,
+  amountToRawAmount,
+  parseTokenAmountUI,
+  shortenSignature,
+} from "../../../../solana/utils";
 
 interface FundingPoolPageProps {
   params: Promise<{
@@ -44,12 +51,85 @@ export default function FundingPoolDetailPage({
   const [depositSignature, setDepositSignature] = useState<string | null>(
     null,
   );
+  const [pool, setPool] = useState<FundingPool | null>(null);
+  const [isLoadingPool, setIsLoadingPool] = useState(true);
+  const [poolError, setPoolError] = useState<string | null>(null);
   const resolvedParams = use(params);
   const { program, provider } = useCrowdfundingProgram();
   const { connected, publicKey } = useWallet();
   const { setVisible } = useWalletModal();
-  const pool = getFundingPoolById(resolvedParams.id);
   const usdcCoin = getCoinById("usdc");
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadPool = async () => {
+      setIsLoadingPool(true);
+      setPoolError(null);
+
+      try {
+        const pool = await getFundingPoolById(resolvedParams.id);
+
+        if (!isActive) {
+          return;
+        }
+
+        setPool(pool ?? null);
+      } catch (error) {
+        console.error("Failed to load funding pool", error);
+
+        if (!isActive) {
+          return;
+        }
+
+        setPool(null);
+        setPoolError("We couldn't load this funding pool. Please try again.");
+      } finally {
+        if (isActive) {
+          setIsLoadingPool(false);
+        }
+      }
+    };
+
+    void loadPool();
+
+    return () => {
+      isActive = false;
+    };
+  }, [resolvedParams.id]);
+
+  if (isLoadingPool) {
+    return (
+      <div className="page-wrapper">
+        <Navbar />
+        <div className="bottom-logo-box">
+          <section className="screen-wrapper">
+            <div className="container">
+              <p>Loading funding pool...</p>
+            </div>
+          </section>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (poolError) {
+    return (
+      <div className="page-wrapper">
+        <Navbar />
+        <div className="bottom-logo-box">
+          <section className="screen-wrapper">
+            <div className="container">
+              <h1>Something went wrong</h1>
+              <p>{poolError}</p>
+            </div>
+          </section>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   const handleDeposit = async () => {
     if (!connected || !publicKey) {
@@ -189,6 +269,40 @@ export default function FundingPoolDetailPage({
       </div>
     );
   }
+
+  const poolDepositLimit = pool.chainData?.depositLimit;
+  const poolTotalDeposited = pool.chainData?.totalDeposited;
+  console.log("Pool: ", pool);
+  console.log("Pool Deposit Limit:", poolDepositLimit?.toString());
+  console.log("Pool Total Deposited:", poolTotalDeposited?.toString());
+
+  const raisedDisplay = poolTotalDeposited
+    ? `${parseTokenAmountUI(poolTotalDeposited, 6, 0)} ${pool.currency}`
+    : `$${pool.fundingRaised.toLocaleString()}`;
+
+  const targetDisplay = poolDepositLimit
+    ? `${parseTokenAmountUI(poolDepositLimit, 6, 0)} ${pool.currency}`
+    : `$${pool.fundingTarget.toLocaleString()}`;
+
+  const poolProgress =
+    poolDepositLimit &&
+    poolTotalDeposited &&
+    !poolDepositLimit.isZero()
+      ? (Number(
+          poolTotalDeposited
+            .mul(PRECISSION_BN)
+            .div(poolDepositLimit)
+            .toString(),
+        ) /
+          PRECISION) *
+        100
+      : pool.fundingProgress;
+
+  const progressPercentage = Math.max(0, Math.min(100, poolProgress));
+  const progressLabel =
+    Number.isFinite(progressPercentage) && progressPercentage % 1 !== 0
+      ? progressPercentage.toFixed(2)
+      : progressPercentage.toFixed(0);
 
   const tabs = ["Overview", "Details", "Impact", "Calculate Your Returns"];
 
@@ -391,20 +505,20 @@ export default function FundingPoolDetailPage({
                       <div className="gap-10">
                         <span>
                           <span className="text-14 text-bold text-dark">
-                            ${pool.fundingRaised.toLocaleString()} raised{" "}
+                            {raisedDisplay} raised{" "}
                           </span>
                           <span className="text-medium text-14">
-                            of ${pool.fundingTarget.toLocaleString()}
+                            of {targetDisplay}
                           </span>
                         </span>
                         <ProgressBar
-                          progress={pool.fundingProgress}
+                          progress={progressPercentage}
                           label=""
                           showLabel={false}
                           size="small"
                         />
                         <span className="text-14 text-medium margin-left-auto">
-                          {pool.fundingProgress}%
+                          {progressLabel}%
                         </span>
                       </div>
 

@@ -1169,6 +1169,10 @@
             "type": "pubkey"
           },
           {
+            "name": "deposit_limit",
+            "type": "u64"
+          },
+          {
             "name": "total_deposited",
             "type": "u64"
           },

@@ -1175,6 +1175,10 @@ export type Crowdfunding = {
             "type": "pubkey"
           },
           {
+            "name": "depositLimit",
+            "type": "u64"
+          },
+          {
             "name": "totalDeposited",
             "type": "u64"
           },

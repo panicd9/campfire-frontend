@@ -2,9 +2,12 @@ import Navbar from "@/components/Global/Navbar";
 import Footer from "@/components/Global/Footer";
 import ProgressBar from "@/components/Global/ProgressBar";
 import { getAllFundingPools } from "@/lib/fundingPools";
+import { parseTokenAmountUI, PRECISION, PRECISSION_BN } from "../../../solana/utils";
+import { Anchor } from "lucide-react";
+import { BN } from "@coral-xyz/anchor";
 
-export default function FundingPoolPage() {
-  const fundingPools = getAllFundingPools();
+export default async function FundingPoolPage() {
+  const fundingPools = await getAllFundingPools();
 
   return (
     <>
@@ -46,7 +49,7 @@ export default function FundingPoolPage() {
                           </ul>
                         </div>
                         <ProgressBar
-                          progress={pool.fundingProgress}
+                          progress={pool.chainData?.totalDeposited.mul(PRECISSION_BN).div(pool.chainData!.depositLimit).toNumber() / PRECISION * 100|| 0}
                           label="Funding Progress"
                           size="medium"
                         />
@@ -54,14 +57,14 @@ export default function FundingPoolPage() {
                           <div className="grey-item border-radius-12">
                             <span className="text-12">Funding Target</span>
                             <span className="text-black">
-                              {pool.fundingTarget.toLocaleString()}{" "}
+                              {parseTokenAmountUI(pool.chainData?.depositLimit, 6, 0)}{" "}
                               {pool.currency}
                             </span>
                           </div>
                           <div className="grey-item border-radius-12">
                             <span className="text-12">Raised</span>
                             <span className="text-black">
-                              {pool.fundingRaised.toLocaleString()}{" "}
+                              {parseTokenAmountUI(pool.chainData?.totalDeposited, 6, 0)}{" "}
                               {pool.currency}
                             </span>
                           </div>
