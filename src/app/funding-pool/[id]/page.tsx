@@ -43,9 +43,11 @@ export default function FundingPoolDetailPage({
   params,
 }: FundingPoolPageProps) {
   const [activeTab, setActiveTab] = useState("Overview");
+  const [activeInvestTab, setActiveInvestTab] = useState("Invest");
   const [initialInvestment, setInitialInvestment] = useState(100);
   const [investmentDuration, setInvestmentDuration] = useState(100);
   const [depositAmount, setDepositAmount] = useState("");
+  const [claimAmount, setClaimAmount] = useState("");
   const [isDepositing, setIsDepositing] = useState(false);
   const [depositError, setDepositError] = useState<string | null>(null);
   const [depositSignature, setDepositSignature] = useState<string | null>(
@@ -522,23 +524,50 @@ export default function FundingPoolDetailPage({
                         </span>
                       </div>
 
-                      {/* Invest Section */}
+                      {/* Invest/Claim Section */}
                       <div className="invest-section">
                         <div className="invest-header">
-                          <span className="text-dark text-bold">Invest</span>
-                          <span className="text-14 text-medium">
-                            Min: 1 USDC
-                          </span>
+                          <div className="invest-tabs">
+                            <span
+                              className={`invest-tab ${
+                                activeInvestTab === "Invest"
+                                  ? "invest-tab-active"
+                                  : ""
+                              }`}
+                              onClick={() => setActiveInvestTab("Invest")}
+                              style={{ cursor: "pointer" }}
+                            >
+                              Invest
+                            </span>
+                            <span
+                              className={`invest-tab ${
+                                activeInvestTab === "Claim"
+                                  ? "invest-tab-active"
+                                  : ""
+                              }`}
+                              onClick={() => setActiveInvestTab("Claim")}
+                              style={{ cursor: "pointer" }}
+                            >
+                              Claim
+                            </span>
+                          </div>
+                          {activeInvestTab === "Invest" && (
+                            <span className="text-14 text-medium">
+                              Min: 1 USDC
+                            </span>
+                          )}
                         </div>
 
-                        <div className="invest-input-section">
-                          <div className="invest-input-wrapper">
-                            <input
-                              type="number"
-                              step="0.01"
-                              min="1"
-                              value={depositAmount}
-                              onChange={(e) => {
+                        {activeInvestTab === "Invest" && (
+                          <>
+                            <div className="invest-input-section">
+                              <div className="invest-input-wrapper">
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  min="1"
+                                  value={depositAmount}
+                                                                onChange={(e) => {
                                 setDepositAmount(e.target.value);
                                 if (depositError) {
                                   setDepositError(null);
@@ -547,55 +576,109 @@ export default function FundingPoolDetailPage({
                                   setDepositSignature(null);
                                 }
                               }}
-                              placeholder="0.00"
-                              className="invest-amount-input"
-                            />
-                            <div className="coin-selector-invest">
-                              <div className="coin-icon-wrapper">
-                                <Image
-                                  src={usdcCoin?.icon || "/assets/usdc.png"}
-                                  alt="USDC"
-                                  className="coin-icon-img"
-                                  width={24}
-                                  height={24}
+                                  placeholder="0.00"
+                                  className="invest-amount-input"
                                 />
+                                <div className="coin-selector-invest">
+                                  <div className="coin-icon-wrapper">
+                                    <img
+                                      src={usdcCoin?.icon || "/assets/usdc.png"}
+                                      alt="USDC"
+                                      className="coin-icon-img"
+                                    />
+                                  </div>
+                                  <span className="coin-symbol">USDC</span>
+                                </div>
                               </div>
-                              <span className="coin-symbol">USDC</span>
+
+                              <div className="balance-info">
+                                <span className="balance-text">
+                                  0.000000 USDC
+                                </span>
+                                <button className="max-button">Max</button>
+                              </div>
                             </div>
-                          </div>
 
-                          <div className="balance-info">
-                            <span className="balance-text">0.000000 USDC</span>
-                            <button className="max-button">Max</button>
-                          </div>
-                        </div>
-
-                        <button
-                          type="button"
-                          className="deposit-button bg-linear-green"
-                          onClick={handleDeposit}
-                          disabled={
-                            isDepositing || (connected && depositAmount.trim() === "")
-                          }
-                        >
-                          {connected
-                            ? isDepositing
-                              ? "Depositing..."
-                              : "Deposit"
-                            : "Connect Wallet"}
-                        </button>
-                        {depositError && (
-                          <p
-                            className="text-12 text-medium"
-                            style={{ color: "#DC2626", marginTop: "0.5rem" }}
-                          >
-                            {depositError}
-                          </p>
+                            <button className="deposit-button bg-linear-green">
+                              Deposit
+                            </button>
+                          </>
                         )}
-                        {depositSignature && (
-                          <p className="text-12 text-medium" style={{ marginTop: "0.5rem" }}>
-                            Deposit submitted. Signature: {shortenSignature(depositSignature)}
-                          </p>
+
+                        {activeInvestTab === "Claim" && (
+                          <>
+                            <div className="claim-info-section">
+                              <div className="claim-info-item">
+                                <span className="text-14 text-medium">
+                                  Locked USDC
+                                </span>
+                                <span className="text-14 text-bold text-dark">
+                                  1,250.00 USDC
+                                </span>
+                              </div>
+                              <div className="claim-info-item">
+                                <span className="text-14 text-medium">
+                                  Claimable Amount
+                                </span>
+                                <span className="text-14 text-bold text-dark">
+                                  850.00 USDC
+                                </span>
+                              </div>
+                              <div className="claim-info-item">
+                                <span className="text-14 text-medium">
+                                  Reward
+                                </span>
+                                <span className="text-14 text-bold text-green">
+                                  125.50 USDC
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="invest-input-section">
+                              <div className="invest-input-wrapper">
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  min="0.01"
+                                  value={claimAmount}
+                                  onChange={(e) =>
+                                    setClaimAmount(e.target.value)
+                                  }
+                                  placeholder="0.00"
+                                  className="invest-amount-input"
+                                />
+                                <div className="coin-selector-invest">
+                                  <div className="coin-icon-wrapper">
+                                    <img
+                                      src={usdcCoin?.icon || "/assets/usdc.png"}
+                                      alt="USDC"
+                                      className="coin-icon-img"
+                                    />
+                                  </div>
+                                  <span className="coin-symbol">USDC</span>
+                                </div>
+                              </div>
+
+                              <div className="balance-info">
+                                <span className="balance-text">
+                                  850.00 USDC available
+                                </span>
+                                <button className="max-button">Max</button>
+                              </div>
+                            </div>
+
+                            <button
+                              className="deposit-button bg-linear-green claim-button-disabled"
+                              disabled
+                            >
+                              <img
+                                src="/assets/Locked.svg"
+                                alt="Locked"
+                                className="claim-button-icon"
+                              />
+                              Claim (Locked)
+                            </button>
+                          </>
                         )}
                       </div>
                     </div>

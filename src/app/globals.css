@@ -2097,6 +2097,74 @@ button {
   opacity: 0.9;
 }
 
+/* Invest Tabs Styles */
+.invest-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 0;
+}
+
+.invest-tab {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #9CA3AF;
+  background: transparent;
+  transition: all 0.2s ease;
+  font-family: 'Satoshi', sans-serif;
+}
+
+.invest-tab:hover {
+  color: var(--Text-Dark);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.invest-tab-active {
+  color: var(--Text-Dark);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Claim Section Styles */
+.claim-info-section {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.claim-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.claim-info-item:last-child {
+  margin-bottom: 0;
+}
+
+.text-green {
+  color: #00ff88;
+}
+
+/* Claim Button Disabled Styles */
+.claim-button-disabled {
+  opacity: 0.8 !important;
+  pointer-events: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
+.claim-button-icon {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) invert(1);
+}
+
 .range-slider-input::-webkit-slider-track {
   height: 10px;
   border-radius: 5px;
