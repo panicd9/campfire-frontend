@@ -3,8 +3,6 @@ import Footer from "@/components/Global/Footer";
 import ProgressBar from "@/components/Global/ProgressBar";
 import { getAllFundingPools } from "@/lib/fundingPools";
 import { parseTokenAmountUI, PRECISION, PRECISSION_BN } from "../../../solana/utils";
-import { Anchor } from "lucide-react";
-import { BN } from "@coral-xyz/anchor";
 
 export default async function FundingPoolPage() {
   const fundingPools = await getAllFundingPools();
@@ -49,7 +47,11 @@ export default async function FundingPoolPage() {
                           </ul>
                         </div>
                         <ProgressBar
-                          progress={pool.chainData?.totalDeposited.mul(PRECISSION_BN).div(pool.chainData!.depositLimit).toNumber() / PRECISION * 100|| 0}
+                          progress={
+                            pool.chainData
+                              ? pool.chainData.totalDeposited.mul(PRECISSION_BN).div(pool.chainData.depositLimit).toNumber() / PRECISION * 100
+                              : pool.fundingProgress
+                          }
                           label="Funding Progress"
                           size="medium"
                         />
@@ -57,15 +59,19 @@ export default async function FundingPoolPage() {
                           <div className="grey-item border-radius-12">
                             <span className="text-12">Funding Target</span>
                             <span className="text-black">
-                              {parseTokenAmountUI(pool.chainData?.depositLimit, 6, 0)}{" "}
-                              {pool.currency}
+                              {pool.chainData
+                                ? `${parseTokenAmountUI(pool.chainData.depositLimit, 6, 0)} ${pool.currency}`
+                                : `${pool.fundingTarget.toLocaleString()} ${pool.currency}`
+                              }
                             </span>
                           </div>
                           <div className="grey-item border-radius-12">
                             <span className="text-12">Raised</span>
                             <span className="text-black">
-                              {parseTokenAmountUI(pool.chainData?.totalDeposited, 6, 0)}{" "}
-                              {pool.currency}
+                              {pool.chainData
+                                ? `${parseTokenAmountUI(pool.chainData.totalDeposited, 6, 0)} ${pool.currency}`
+                                : `${pool.fundingRaised.toLocaleString()} ${pool.currency}`
+                              }
                             </span>
                           </div>
                         </div>

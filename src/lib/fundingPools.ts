@@ -12,9 +12,10 @@ export interface FundingPool {
     depositLimit: anchor.BN;
     totalDeposited: anchor.BN;
     issued: boolean;
-    rwaMint: anchor.web3.PublicKey;
-    rwaVault: anchor.web3.PublicKey;
+    rwaMint: anchor.web3.PublicKey | null;
+    rwaVault: anchor.web3.PublicKey | null;
     rwaTotalSupply: anchor.BN;
+    rwaTransferHookProgram?: anchor.web3.PublicKey | null;
   };
   id: string;
   name: string;
@@ -140,6 +141,7 @@ export const fundingPools: FundingPool[] = [
       rwaMint: new PublicKey("3Nd1mY7bG3t6b8v4Y6SLD1d2nQ8V5Zc4U5r7h6v3KJ8o"),
       rwaVault: new PublicKey("5Nd1mY7bG3t6b8v4Y6SLD1d2nQ8V5Zc4U5r7h6v3KJ8o"),
       rwaTotalSupply: new BN(1_000_000 * 10**6),
+      rwaTransferHookProgram: null,
     },
     id: "1",
     name: "Solar Farm - Green Energy",
@@ -206,18 +208,23 @@ export const u64LE = (value: number | bigint) => {
 };
 
 export async function getAllFundingPools(): Promise<FundingPool[]> {
-  const connection = new Connection("http://127.0.0.1:8899");
-  const program: Program<Crowdfunding> = new anchor.Program(CrowdfundingIDL, { connection });
+  try {
+    const connection = new Connection("http://127.0.0.1:8899");
+    const program: Program<Crowdfunding> = new anchor.Program(CrowdfundingIDL, { connection });
 
-  const [pool0Pda] = PublicKey.findProgramAddressSync(
-    [Buffer.from("pool"), u64LE(0)],
-    program.programId,
-  );
+    const [pool0Pda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("pool"), u64LE(0)],
+      program.programId,
+    );
 
-  const pool = await program.account.fundingPool.fetch(pool0Pda);
+    const pool = await program.account.fundingPool.fetch(pool0Pda);
 
-  const demoFundingPools = [...fundingPools];
-  demoFundingPools[0].chainData = pool;
+    const demoFundingPools = [...fundingPools];
+    demoFundingPools[0].chainData = pool;
 
-  return fundingPools;
+    return demoFundingPools;
+  } catch (error) {
+    console.warn("Failed to fetch funding pools from chain, using static data:", error);
+    return fundingPools;
+  }
 }
