@@ -408,10 +408,6 @@ export default function LiquidityPage() {
             <div className="gap-32">
               <div className="gap-16">
                 <h1>Liquidity</h1>
-                <p>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                  do eiusmod tempor incididunt
-                </p>
               </div>
               <div className="swap-wrapper">
                 <div className="swap-left border-radius-12 liquidity-left">

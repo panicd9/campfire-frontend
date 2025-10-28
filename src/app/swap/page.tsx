@@ -518,10 +518,6 @@ export default function SwapPage() {
             <div className="gap-32">
               <div className="gap-16">
                 <h1>Swap</h1>
-                <p>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                  do eiusmod tempor incididunt{" "}
-                </p>
               </div>
               <div className="grey-box border-radius-12">
                 <div className="swap-wrapper">
