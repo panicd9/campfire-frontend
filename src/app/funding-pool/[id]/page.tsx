@@ -126,6 +126,9 @@ export default function FundingPoolDetailPage({
   const [pool, setPool] = useState<FundingPool | null>(null);
   const [isLoadingPool, setIsLoadingPool] = useState(true);
   const [poolError, setPoolError] = useState<string | null>(null);
+  const [isRedeeming, setIsRedeeming] = useState(false);
+  const [redeemError, setRedeemError] = useState<string | null>(null);
+  const [redeemSignature, setRedeemSignature] = useState<string | null>(null);
   const resolvedParams = use(params);
   const { program, provider } = useCrowdfundingProgram();
   const { program: rwaProgram } = useRwaTransferHookProgram();
@@ -750,6 +753,131 @@ export default function FundingPoolDetailPage({
     }
   };
 
+  const handleRedeem = async () => {
+    if (!connected || !publicKey) {
+      setRedeemError("Connect your wallet to redeem.");
+      setRedeemSignature(null);
+      setVisible(true);
+      return;
+    }
+
+    if (!program || !provider) {
+      setRedeemError("Wallet provider is not ready. Please reconnect and try again.");
+      return;
+    }
+
+    if (!pool) {
+      setRedeemError("Pool information not loaded.");
+      return;
+    }
+
+    // Check if user is trying to claim yield (not yet implemented)
+    if (claimMode === "yield") {
+      setRedeemError("Yield claiming is not yet available. Coming soon!");
+      return;
+    }
+
+    const poolIdString = resolvedParams.id;
+
+    if (!/^\d+$/.test(poolIdString)) {
+      setRedeemError("Invalid funding pool identifier.");
+      return;
+    }
+
+    setIsRedeeming(true);
+    setRedeemError(null);
+    setRedeemSignature(null);
+
+    try {
+      const poolId = new BN(poolIdString);
+      const poolIdSeed = poolId.toArrayLike(Uint8Array, "le", 8);
+      const poolSeed = utils.bytes.utf8.encode("pool");
+      const poolAuthoritySeed = utils.bytes.utf8.encode("pool-authority");
+      const depositorInfoSeed = utils.bytes.utf8.encode("depositor-info");
+
+      // Derive PDAs
+      const [poolPda] = PublicKey.findProgramAddressSync(
+        [poolSeed, poolIdSeed],
+        program.programId,
+      );
+
+      const [poolAuthorityPda] = PublicKey.findProgramAddressSync(
+        [poolAuthoritySeed, poolIdSeed],
+        program.programId,
+      );
+
+      const [depositorInfoPda] = PublicKey.findProgramAddressSync(
+        [depositorInfoSeed, publicKey.toBuffer(), poolIdSeed],
+        program.programId,
+      );
+
+      // Fetch pool to get RWA mint address
+      const poolAccount = await program.account.fundingPool.fetch(poolPda);
+
+      if (!poolAccount.rwaMint) {
+        setRedeemError("RWA tokens not yet issued for this pool.");
+        setIsRedeeming(false);
+        return;
+      }
+
+      const rwaMint = poolAccount.rwaMint as PublicKey;
+
+      // Derive token accounts
+      const rwaVaultAta = getAssociatedTokenAddressSync(
+        rwaMint,
+        poolAuthorityPda,
+        true, // allowOwnerOffCurve (PDA)
+        TOKEN_2022_PROGRAM_ID,
+        ASSOCIATED_TOKEN_PROGRAM_ID,
+      );
+
+      const userRwaAta = getAssociatedTokenAddressSync(
+        rwaMint,
+        publicKey,
+        false, // User wallet is not off-curve
+        TOKEN_2022_PROGRAM_ID,
+        ASSOCIATED_TOKEN_PROGRAM_ID,
+      );
+
+      // Execute redeem
+      const signature = await program.methods
+        .claim(poolId)
+        .accountsStrict({
+          pool: poolPda,
+          poolAuthority: poolAuthorityPda,
+          rwaVault: rwaVaultAta,
+          rwaMint: rwaMint,
+          userRwaAta: userRwaAta,
+          depositorInfo: depositorInfoPda,
+          user: publicKey,
+          systemProgram: SystemProgram.programId,
+          tokenProgram: TOKEN_2022_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        })
+        .rpc();
+
+      setRedeemSignature(signature);
+      console.log("Redeem successful! Transaction:", signature);
+
+      // Refresh depositor info after successful redeem
+      setTimeout(() => {
+        // Trigger re-fetch by calling the effect dependencies
+        setIsDepositorInfoLoading(true);
+      }, 1000);
+    } catch (error) {
+      console.error("Redeem failed", error);
+      let message = "Redeem failed. Please try again.";
+
+      if (error instanceof Error && error.message) {
+        message = error.message;
+      }
+
+      setRedeemError(message);
+    } finally {
+      setIsRedeeming(false);
+    }
+  };
+
   if (!pool) {
     return (
       <div className="page-wrapper">
@@ -1297,7 +1425,8 @@ export default function FundingPoolDetailPage({
                               className={`deposit-button bg-linear-green ${
                                 isClaimAvailable ? "" : "claim-button-disabled"
                               }`}
-                              disabled={!isClaimAvailable}
+                              disabled={!isClaimAvailable || isRedeeming}
+                              onClick={handleRedeem}
                             >
                               {!isClaimAvailable && (
                                 <Image
@@ -1308,8 +1437,21 @@ export default function FundingPoolDetailPage({
                                   height={16}
                                 />
                               )}
-                              {claimButtonLabel}
+                              {isRedeeming ? "Redeeming..." : claimButtonLabel}
                             </button>
+                            {redeemError && (
+                              <p
+                                className="text-12 text-medium"
+                                style={{ color: "#DC2626", marginTop: "0.5rem" }}
+                              >
+                                {redeemError}
+                              </p>
+                            )}
+                            {redeemSignature && (
+                              <p className="text-12 text-medium" style={{ marginTop: "0.5rem" }}>
+                                Redeem successful! Signature: {shortenSignature(redeemSignature)}
+                              </p>
+                            )}
                           </>
                         )}
                       </div>
