@@ -1995,12 +1995,14 @@ button {
 }
 
 .invest-input-wrapper {
+  position: relative;
   display: flex;
   align-items: center;
   background: var(--White);
   border: 1px solid var(--Stroke-Color);
   border-radius: 12px;
   padding: 12px 16px;
+  padding-right: 96px;
   margin-bottom: 8px;
 }
 
@@ -2020,6 +2022,10 @@ button {
 }
 
 .coin-selector-invest {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -2032,6 +2038,8 @@ button {
 .coin-icon-wrapper {
   width: 24px;
   height: 24px;
+  min-width: 24px;
+  flex-shrink: 0;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -2049,6 +2057,7 @@ button {
   font-size: 14px;
   font-weight: 600;
   font-family: 'Satoshi', sans-serif;
+  white-space: nowrap;
 }
 
 .balance-info {
@@ -2139,6 +2148,11 @@ button {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
+}
+
+.claim-info-item > :last-child {
+  white-space: nowrap;
+  word-break: normal;
 }
 
 .claim-info-item:last-child {

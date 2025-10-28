@@ -87,41 +87,8 @@ export type Crowdfunding = {
                 "path": "poolAuthority"
               },
               {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
+                "kind": "account",
+                "path": "tokenProgram"
               },
               {
                 "kind": "account",
@@ -181,41 +148,8 @@ export type Crowdfunding = {
                 "path": "user"
               },
               {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
+                "kind": "account",
+                "path": "tokenProgram"
               },
               {
                 "kind": "account",
@@ -306,8 +240,7 @@ export type Crowdfunding = {
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "name": "tokenProgram"
         },
         {
           "name": "associatedTokenProgram",
@@ -412,41 +345,8 @@ export type Crowdfunding = {
                 "path": "poolAuthority"
               },
               {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
+                "kind": "account",
+                "path": "tokenProgram"
               },
               {
                 "kind": "account",
@@ -503,8 +403,7 @@ export type Crowdfunding = {
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "name": "tokenProgram"
         },
         {
           "name": "associatedTokenProgram",
@@ -595,41 +494,8 @@ export type Crowdfunding = {
                 "path": "poolAuthority"
               },
               {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
+                "kind": "account",
+                "path": "tokenProgram"
               },
               {
                 "kind": "account",
@@ -686,41 +552,8 @@ export type Crowdfunding = {
                 "path": "user"
               },
               {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
+                "kind": "account",
+                "path": "tokenProgram"
               },
               {
                 "kind": "account",
@@ -768,6 +601,9 @@ export type Crowdfunding = {
           }
         },
         {
+          "name": "depositMint"
+        },
+        {
           "name": "depositorInfo",
           "writable": true,
           "pda": {
@@ -808,8 +644,7 @@ export type Crowdfunding = {
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "name": "tokenProgram"
         },
         {
           "name": "associatedTokenProgram",
@@ -952,41 +787,8 @@ export type Crowdfunding = {
                 "path": "poolAuthority"
               },
               {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
+                "kind": "account",
+                "path": "tokenProgram"
               },
               {
                 "kind": "account",
@@ -1037,8 +839,7 @@ export type Crowdfunding = {
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "name": "tokenProgram"
         },
         {
           "name": "associatedTokenProgram",
@@ -1049,6 +850,10 @@ export type Crowdfunding = {
         {
           "name": "poolId",
           "type": "u64"
+        },
+        {
+          "name": "transferHookProgramId",
+          "type": "pubkey"
         }
       ]
     }
@@ -1127,13 +932,23 @@ export type Crowdfunding = {
     },
     {
       "code": 6006,
+      "name": "invalidDepositMint",
+      "msg": "Invalid deposit mint for this pool"
+    },
+    {
+      "code": 6007,
       "name": "nothingToClaim",
       "msg": "Nothing to claim"
     },
     {
-      "code": 6007,
+      "code": 6008,
       "name": "depositsClosed",
       "msg": "Deposits are closed after issuance"
+    },
+    {
+      "code": 6009,
+      "name": "poolIdMismatch",
+      "msg": "Pool id does not match account seed"
     }
   ],
   "types": [
@@ -1201,6 +1016,12 @@ export type Crowdfunding = {
           {
             "name": "rwaTotalSupply",
             "type": "u64"
+          },
+          {
+            "name": "rwaTransferHookProgram",
+            "type": {
+              "option": "pubkey"
+            }
           }
         ]
       }

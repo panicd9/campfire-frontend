@@ -47,8 +47,8 @@ export const coins: Coin[] = [
     color: '#2775CA',
     price: 1.0,
     change24h: 0.0,
-    volume24h: 1234567890,
-    marketCap: 50000000000,
+    volume24h: 955000000,
+    marketCap: 26200000000,
     chartData: [
       { time: "2024-01-01", value: 1.0 },
       { time: "2024-01-02", value: 1.0 },
@@ -66,18 +66,18 @@ export const coins: Coin[] = [
     icon: '/assets/cf-wind1.avif',
     decimals: 18,
     color: '#10B981',
-    price: 0.85,
-    change24h: 0.05,
-    volume24h: 1234567,
-    marketCap: 50000000,
+    price: 1.08,
+    change24h: 2.1,
+    volume24h: 1580000,
+    marketCap: 14500000,
     chartData: [
-      { time: "2024-01-01", value: 0.8 },
-      { time: "2024-01-02", value: 0.82 },
-      { time: "2024-01-03", value: 0.85 },
-      { time: "2024-01-04", value: 0.83 },
-      { time: "2024-01-05", value: 0.86 },
-      { time: "2024-01-06", value: 0.84 },
-      { time: "2024-01-07", value: 0.85 },
+      { time: "2024-01-01", value: 0.95 },
+      { time: "2024-01-02", value: 0.98 },
+      { time: "2024-01-03", value: 1.02 },
+      { time: "2024-01-04", value: 1.04 },
+      { time: "2024-01-05", value: 1.06 },
+      { time: "2024-01-06", value: 1.07 },
+      { time: "2024-01-07", value: 1.08 },
     ]
   },
   {
@@ -87,18 +87,18 @@ export const coins: Coin[] = [
     icon: '/assets/cf-solar1.png',
     decimals: 18,
     color: '#F59E0B',
-    price: 1.25,
-    change24h: -0.02,
-    volume24h: 2345678,
-    marketCap: 75000000,
+    price: 0.92,
+    change24h: -1.2,
+    volume24h: 910000,
+    marketCap: 9800000,
     chartData: [
-      { time: "2024-01-01", value: 1.27 },
-      { time: "2024-01-02", value: 1.26 },
-      { time: "2024-01-03", value: 1.25 },
-      { time: "2024-01-04", value: 1.24 },
-      { time: "2024-01-05", value: 1.25 },
-      { time: "2024-01-06", value: 1.26 },
-      { time: "2024-01-07", value: 1.25 },
+      { time: "2024-01-01", value: 0.94 },
+      { time: "2024-01-02", value: 0.93 },
+      { time: "2024-01-03", value: 0.92 },
+      { time: "2024-01-04", value: 0.91 },
+      { time: "2024-01-05", value: 0.9 },
+      { time: "2024-01-06", value: 0.92 },
+      { time: "2024-01-07", value: 0.92 },
     ]
   },
   {
@@ -108,18 +108,18 @@ export const coins: Coin[] = [
     icon: '/assets/cf-bio1.png',
     decimals: 18,
     color: '#8B5CF6',
-    price: 0.95,
-    change24h: 0.03,
-    volume24h: 3456789,
-    marketCap: 60000000,
+    price: 1.35,
+    change24h: 1.8,
+    volume24h: 720000,
+    marketCap: 12500000,
     chartData: [
-      { time: "2024-01-01", value: 0.92 },
-      { time: "2024-01-02", value: 0.94 },
-      { time: "2024-01-03", value: 0.95 },
-      { time: "2024-01-04", value: 0.96 },
-      { time: "2024-01-05", value: 0.94 },
-      { time: "2024-01-06", value: 0.95 },
-      { time: "2024-01-07", value: 0.95 },
+      { time: "2024-01-01", value: 1.22 },
+      { time: "2024-01-02", value: 1.24 },
+      { time: "2024-01-03", value: 1.28 },
+      { time: "2024-01-04", value: 1.32 },
+      { time: "2024-01-05", value: 1.34 },
+      { time: "2024-01-06", value: 1.35 },
+      { time: "2024-01-07", value: 1.35 },
     ]
   },
   {
@@ -129,18 +129,18 @@ export const coins: Coin[] = [
     icon: '/assets/cf-hydro1.png',
     decimals: 18,
     color: '#3B82F6',
-    price: 1.15,
-    change24h: 0.01,
-    volume24h: 4567890,
-    marketCap: 70000000,
+    price: 0.76,
+    change24h: 0.4,
+    volume24h: 510000,
+    marketCap: 8300000,
     chartData: [
-      { time: "2024-01-01", value: 1.14 },
-      { time: "2024-01-02", value: 1.15 },
-      { time: "2024-01-03", value: 1.16 },
-      { time: "2024-01-04", value: 1.14 },
-      { time: "2024-01-05", value: 1.15 },
-      { time: "2024-01-06", value: 1.16 },
-      { time: "2024-01-07", value: 1.15 },
+      { time: "2024-01-01", value: 0.73 },
+      { time: "2024-01-02", value: 0.74 },
+      { time: "2024-01-03", value: 0.75 },
+      { time: "2024-01-04", value: 0.76 },
+      { time: "2024-01-05", value: 0.76 },
+      { time: "2024-01-06", value: 0.75 },
+      { time: "2024-01-07", value: 0.76 },
     ]
   }
 ];
@@ -150,37 +150,37 @@ export const dashboardAssets: AssetPair[] = [
     id: 'cf-wind1-usdc',
     baseCoin: coins.find(c => c.id === 'cf-wind1')!,
     quoteCoin: coins.find(c => c.id === 'usdc')!,
-    price: 1246.65,
-    yield: 11.14,
-    volume24h: 9798245,
-    marketCap: 3851156,
+    price: 1.08,
+    yield: 7.9,
+    volume24h: 1580000,
+    marketCap: 14500000,
+  },
+  {
+    id: 'cf-solar1-usdc',
+    baseCoin: coins.find(c => c.id === 'cf-solar1')!,
+    quoteCoin: coins.find(c => c.id === 'usdc')!,
+    price: 0.92,
+    yield: 6.4,
+    volume24h: 910000,
+    marketCap: 9800000,
   },
   {
     id: 'cf-bio1-usdc',
     baseCoin: coins.find(c => c.id === 'cf-bio1')!,
     quoteCoin: coins.find(c => c.id === 'usdc')!,
-    price: 1246.65,
-    yield: 11.14,
-    volume24h: 9798245,
-    marketCap: 3851156,
+    price: 1.35,
+    yield: 9.2,
+    volume24h: 720000,
+    marketCap: 12500000,
   },
   {
     id: 'cf-hydro1-usdc',
     baseCoin: coins.find(c => c.id === 'cf-hydro1')!,
     quoteCoin: coins.find(c => c.id === 'usdc')!,
-    price: 1246.65,
-    yield: 11.14,
-    volume24h: 9798245,
-    marketCap: 3851156,
-  },
-  {
-    id: 'cf-hydro1-bio1',
-    baseCoin: coins.find(c => c.id === 'cf-hydro1')!,
-    quoteCoin: coins.find(c => c.id === 'cf-bio1')!,
-    price: 1246.65,
-    yield: 11.14,
-    volume24h: 9798245,
-    marketCap: 3851156,
+    price: 0.76,
+    yield: 5.6,
+    volume24h: 510000,
+    marketCap: 8300000,
   }
 ];
 
@@ -188,39 +188,39 @@ export const portfolioHoldings: PortfolioHolding[] = [
   {
     id: 'cf-wind1-holding',
     coin: coins.find(c => c.id === 'cf-wind1')!,
-    price: 1246.65,
-    holdings: 500,
-    value: 623325,
-    change24h: 12.5
+    price: 1.08,
+    holdings: 12000,
+    value: 12960,
+    change24h: 2.1
   },
   {
     id: 'cf-bio1-holding',
     coin: coins.find(c => c.id === 'cf-bio1')!,
-    price: 1246.65,
-    holdings: 300,
-    value: 373995,
-    change24h: -8.2
+    price: 1.35,
+    holdings: 4000,
+    value: 5400,
+    change24h: 1.8
   },
   {
     id: 'cf-hydro1-holding',
     coin: coins.find(c => c.id === 'cf-hydro1')!,
-    price: 1246.65,
-    holdings: 750,
-    value: 934987.5,
-    change24h: 5.7
+    price: 0.76,
+    holdings: 8000,
+    value: 6080,
+    change24h: 0.4
   }
 ];
 
 export const portfolioStats: PortfolioStats = {
-  currentBalance: 7296.72,
-  totalEarning: -373.15,
-  carbonExtracted: 1423,
+  currentBalance: 24440.0,
+  totalEarning: 1185.45,
+  carbonExtracted: 184,
   topPerformer: {
-    id: 'cf-wind1',
-    name: 'Campfire Wind Token',
-    symbol: 'CF-WIND1',
-    icon: 'assets/8886ea5ab739f6165d6667d1cdc80724_11516.png',
-    change24h: 12.5
+    id: 'cf-bio1',
+    name: 'Campfire Bio Energy',
+    symbol: 'CF-BIO1',
+    icon: '/assets/cf-bio1.png',
+    change24h: 1.8
   }
 };
 
@@ -301,58 +301,58 @@ export interface LiquidityPoolData {
 // Centralized TVL data for different coin pairs
 export const liquidityPoolData: Record<string, LiquidityPoolData> = {
   'usdc-cf-wind1': {
-    tvl: 12.4,
-    progress: 85,
-    fees: 46.25,
-    poolLiquidity: 6531229,
-    pooledBase: 2500000, // USDC
-    pooledQuote: 2000, // CF-WIND1
-    lockedPercentage: 99.9
+    tvl: 5.8,
+    progress: 68,
+    fees: 36.2,
+    poolLiquidity: 3120000,
+    pooledBase: 1450000, // USDC
+    pooledQuote: 1240000, // CF-WIND1
+    lockedPercentage: 93.2
   },
   'usdc-cf-bio1': {
-    tvl: 8.7,
-    progress: 72,
-    fees: 38.15,
-    poolLiquidity: 4200000,
-    pooledBase: 1800000, // USDC
-    pooledQuote: 1500, // CF-BIO1
-    lockedPercentage: 95.5
+    tvl: 4.6,
+    progress: 61,
+    fees: 32.4,
+    poolLiquidity: 2570000,
+    pooledBase: 1120000, // USDC
+    pooledQuote: 960000, // CF-BIO1
+    lockedPercentage: 91.1
   },
   'usdc-cf-hydro1': {
-    tvl: 15.2,
-    progress: 92,
-    fees: 52.8,
-    poolLiquidity: 8900000,
-    pooledBase: 3200000, // USDC
-    pooledQuote: 2500, // CF-HYDRO1
-    lockedPercentage: 98.7
+    tvl: 3.1,
+    progress: 54,
+    fees: 27.8,
+    poolLiquidity: 1880000,
+    pooledBase: 910000, // USDC
+    pooledQuote: 740000, // CF-HYDRO1
+    lockedPercentage: 89.5
   },
   'usdc-cf-solar1': {
-    tvl: 6.3,
-    progress: 58,
-    fees: 35.2,
-    poolLiquidity: 2800000,
-    pooledBase: 1200000, // USDC
-    pooledQuote: 800, // CF-SOLAR1
-    lockedPercentage: 92.3
+    tvl: 4.2,
+    progress: 63,
+    fees: 34.1,
+    poolLiquidity: 2260000,
+    pooledBase: 1020000, // USDC
+    pooledQuote: 820000, // CF-SOLAR1
+    lockedPercentage: 90.7
   },
   'cf-wind1-cf-bio1': {
-    tvl: 4.1,
-    progress: 45,
-    fees: 28.7,
-    poolLiquidity: 1800000,
-    pooledBase: 1200, // CF-WIND1
-    pooledQuote: 900, // CF-BIO1
-    lockedPercentage: 88.9
+    tvl: 2.5,
+    progress: 48,
+    fees: 22.6,
+    poolLiquidity: 1430000,
+    pooledBase: 680000, // CF-WIND1
+    pooledQuote: 610000, // CF-BIO1
+    lockedPercentage: 87.3
   },
   'cf-hydro1-cf-bio1': {
-    tvl: 7.8,
-    progress: 68,
-    fees: 41.3,
-    poolLiquidity: 3400000,
-    pooledBase: 1800, // CF-HYDRO1
-    pooledQuote: 1400, // CF-BIO1
-    lockedPercentage: 94.2
+    tvl: 2.9,
+    progress: 52,
+    fees: 25.4,
+    poolLiquidity: 1650000,
+    pooledBase: 720000, // CF-HYDRO1
+    pooledQuote: 650000, // CF-BIO1
+    lockedPercentage: 88.6
   }
 };
 

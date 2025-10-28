@@ -2,13 +2,26 @@ import { Metadata } from "next";
 import Navbar from "@/components/Global/Navbar";
 import Footer from "@/components/Global/Footer";
 import AssetCard from "@/components/dashboard/AssetCard";
-import { dashboardAssets } from "@/lib/data";
+import { dashboardAssets, portfolioStats } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "Dashboard | Campfire",
 };
 
 export default function Dashboard() {
+  const totalValueLocked = dashboardAssets.reduce(
+    (sum, asset) => sum + asset.marketCap,
+    0,
+  );
+  const tvlFormatter = Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    notation: "compact",
+    maximumFractionDigits: 2,
+  });
+  const formattedTvl = tvlFormatter.format(totalValueLocked);
+  const formattedCarbonOffset = `${portfolioStats.carbonExtracted.toLocaleString("en-US")} tons`;
+
   return (
     <div className="page-wrapper">
       <Navbar />
@@ -30,17 +43,17 @@ export default function Dashboard() {
                       <span className="text-18 text-black">
                         Total Value Locked
                       </span>
-                      <span className="text-32">$59.26M</span>
+                          <span className="text-32">{formattedTvl}</span>
                     </div>
                     <div className="info-item border-radius-12">
                       <span className="text-18 text-black">
                         Available Assets
                       </span>
-                      <span className="text-32">7</span>
+                          <span className="text-32">{dashboardAssets.length}</span>
                     </div>
                     <div className="info-item border-radius-12">
                       <span className="text-18 text-black">Carbon Offset</span>
-                      <span className="text-32">1,423 tons</span>
+                          <span className="text-32">{formattedCarbonOffset}</span>
                     </div>
                   </div>
                   <div className="tablet-overflow-auto">

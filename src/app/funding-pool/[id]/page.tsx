@@ -14,6 +14,7 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { BN, utils } from "@coral-xyz/anchor";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
+  TOKEN_2022_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountInstruction,
   getAssociatedTokenAddressSync,
@@ -25,6 +26,7 @@ import {
   TransactionInstruction,
 } from "@solana/web3.js";
 import { useCrowdfundingProgram } from "../../../../solana/crowdfunding/useCrowdfundingProgram";
+import { useRwaTransferHookProgram } from "../../../../solana/rwaTransferHook/useRwaTransferHookProgram";
 import {
   PRECISION,
   PRECISSION_BN,
@@ -32,6 +34,62 @@ import {
   parseTokenAmountUI,
   shortenSignature,
 } from "../../../../solana/utils";
+
+const RWA_SYMBOL = "CF-WIND1";
+
+const formatTokenAmountPlain = (rawAmount: BN, decimals: number): string => {
+  if (decimals === 0) {
+    return rawAmount.toString();
+  }
+
+  const base = new BN(10).pow(new BN(decimals));
+  const whole = rawAmount.div(base).toString();
+  const fraction = rawAmount.mod(base).toString().padStart(decimals, "0");
+  const trimmedFraction = fraction.replace(/0+$/, "");
+
+  return trimmedFraction.length > 0 ? `${whole}.${trimmedFraction}` : whole;
+};
+
+const isAccountMissingError = (error: unknown) => {
+  if (error instanceof Error) {
+    const message = error.message.toLowerCase();
+    return (
+      message.includes("account does not exist") ||
+      message.includes("could not find account") ||
+      message.includes("account not found")
+    );
+  }
+
+  return false;
+};
+
+const SCALE_BIGINT = BigInt("1000000000000");
+
+const toBigInt = (value: BN | bigint | number | string | null | undefined) => {
+  if (value === null || value === undefined) {
+    return BigInt(0);
+  }
+
+  if (typeof value === "bigint") {
+    return value;
+  }
+
+  if (typeof value === "number") {
+    return BigInt(value);
+  }
+
+  if (typeof value === "string") {
+    return BigInt(value);
+  }
+
+  return BigInt(value.toString());
+};
+
+interface DepositorInfoStats {
+  depositedUsdc: BN;
+  claimableRwa: BN;
+  claimableYield: BN;
+}
 
 interface FundingPoolPageProps {
   params: Promise<{
@@ -47,7 +105,9 @@ export default function FundingPoolDetailPage({
   const [initialInvestment, setInitialInvestment] = useState(100);
   const [investmentDuration, setInvestmentDuration] = useState(100);
   const [depositAmount, setDepositAmount] = useState("");
-  const [claimAmount, setClaimAmount] = useState("");
+  const [claimMode, setClaimMode] = useState<"rwa" | "yield">("rwa");
+  const [claimRwaAmount, setClaimRwaAmount] = useState("");
+  const [claimYieldAmount, setClaimYieldAmount] = useState("");
   const [isDepositing, setIsDepositing] = useState(false);
   const [depositError, setDepositError] = useState<string | null>(null);
   const [depositSignature, setDepositSignature] = useState<string | null>(
@@ -55,14 +115,24 @@ export default function FundingPoolDetailPage({
   );
   const [userDepositBalance, setUserDepositBalance] = useState("0.000000");
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
+  const [depositorInfoStats, setDepositorInfoStats] = useState<DepositorInfoStats>({
+    depositedUsdc: new BN(0),
+    claimableRwa: new BN(0),
+    claimableYield: new BN(0),
+  });
+  const [depositMintDecimals, setDepositMintDecimals] = useState(6);
+  const [rwaMintDecimalsState, setRwaMintDecimalsState] = useState(6);
+  const [isDepositorInfoLoading, setIsDepositorInfoLoading] = useState(false);
   const [pool, setPool] = useState<FundingPool | null>(null);
   const [isLoadingPool, setIsLoadingPool] = useState(true);
   const [poolError, setPoolError] = useState<string | null>(null);
   const resolvedParams = use(params);
   const { program, provider } = useCrowdfundingProgram();
+  const { program: rwaProgram } = useRwaTransferHookProgram();
   const { connected, publicKey } = useWallet();
   const { setVisible } = useWalletModal();
   const usdcCoin = getCoinById("usdc");
+  const cfWindCoin = getCoinById("cf-wind1");
 
   useEffect(() => {
     let isActive = true;
@@ -200,7 +270,326 @@ export default function FundingPoolDetailPage({
     return () => {
       isActive = false;
     };
-  }, [connected, publicKey, program, provider, resolvedParams.id, pool]);
+  }, [connected, publicKey, program, provider, resolvedParams.id, pool, depositSignature]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const resetDepositorInfo = () => {
+      if (!isActive) {
+        return;
+      }
+
+      setDepositorInfoStats({
+        depositedUsdc: new BN(0),
+        claimableRwa: new BN(0),
+        claimableYield: new BN(0),
+      });
+      setDepositMintDecimals(6);
+      setRwaMintDecimalsState(6);
+      setClaimRwaAmount("");
+      setClaimYieldAmount("");
+      setClaimMode("rwa");
+    };
+
+    const fetchDepositorInfo = async () => {
+      if (!connected || !publicKey || !program || !provider) {
+        resetDepositorInfo();
+        if (isActive) {
+          setIsDepositorInfoLoading(false);
+        }
+        return;
+      }
+
+      if (!pool) {
+        resetDepositorInfo();
+        if (isActive) {
+          setIsDepositorInfoLoading(false);
+        }
+        return;
+      }
+
+      const poolIdString = resolvedParams.id;
+
+      if (!/^\d+$/.test(poolIdString)) {
+        resetDepositorInfo();
+        if (isActive) {
+          setIsDepositorInfoLoading(false);
+        }
+        return;
+      }
+
+      setIsDepositorInfoLoading(true);
+
+      try {
+        const poolId = new BN(poolIdString);
+        const poolIdSeed = poolId.toArrayLike(Uint8Array, "le", 8);
+        const poolSeed = utils.bytes.utf8.encode("pool");
+        const depositorInfoSeed = utils.bytes.utf8.encode("depositor-info");
+
+        const [poolPda] = PublicKey.findProgramAddressSync(
+          [poolSeed, poolIdSeed],
+          program.programId,
+        );
+
+        const onChainPool = await program.account.fundingPool.fetch(poolPda);
+
+        const depositMintPublicKey = pool.chainData?.depositMint
+          ? pool.chainData.depositMint
+          : new PublicKey(onChainPool.depositMint);
+
+        const depositMintInfo = await getMint(
+          provider.connection,
+          depositMintPublicKey,
+        );
+        setDepositMintDecimals(depositMintInfo.decimals);
+
+        const [depositorInfoPda] = PublicKey.findProgramAddressSync(
+          [depositorInfoSeed, publicKey.toBuffer(), poolIdSeed],
+          program.programId,
+        );
+
+        let depositorInfo: { deposited: BN; claimed: BN } | null = null;
+
+        try {
+          depositorInfo = await program.account.depositorInfo.fetch(
+            depositorInfoPda,
+          );
+        } catch (error) {
+          if (!isAccountMissingError(error)) {
+            throw error;
+          }
+        }
+
+        const depositedRaw = depositorInfo?.deposited ?? new BN(0);
+        const claimedRwaRaw = depositorInfo?.claimed ?? new BN(0);
+
+        const rwaMintPublicKey = (onChainPool.rwaMint ?? null) as
+          | PublicKey
+          | null;
+        const rwaVaultPublicKey = (onChainPool.rwaVault ?? null) as
+          | PublicKey
+          | null;
+
+        let rwaMintDecimals: number | null = null;
+        let claimableRwaRaw = new BN(0);
+        let claimableYieldRawBigInt = BigInt(0);
+        let rwaMintInfo: Awaited<ReturnType<typeof getMint>> | null = null;
+
+        console.log("RWA Mint Public Key:", rwaMintPublicKey?.toBase58() ?? "null");
+        if (rwaMintPublicKey) {
+          try {
+            rwaMintInfo = await getMint(provider.connection, rwaMintPublicKey, "confirmed", TOKEN_2022_PROGRAM_ID);
+            rwaMintDecimals = rwaMintInfo.decimals;
+
+            const totalDepositedRaw = onChainPool.totalDeposited as BN;
+            const totalRwaSupplyRaw = onChainPool.rwaTotalSupply as BN;
+
+            console.log("Total Deposited Raw:", totalDepositedRaw.toString());
+            console.log("Deposited Raw:", depositedRaw.toString());
+
+            if (!totalDepositedRaw.isZero()) {
+              const entitlement = totalRwaSupplyRaw
+                .mul(depositedRaw)
+                .div(totalDepositedRaw);
+
+              claimableRwaRaw = entitlement.sub(claimedRwaRaw);
+
+              if (claimableRwaRaw.isNeg()) {
+                claimableRwaRaw = new BN(0);
+              }
+
+              if (rwaVaultPublicKey) {
+                try {
+                  const vaultBalance =
+                    await provider.connection.getTokenAccountBalance(
+                      rwaVaultPublicKey,
+                    );
+                  const vaultBalanceRaw = new BN(vaultBalance.value.amount);
+
+                  if (claimableRwaRaw.gt(vaultBalanceRaw)) {
+                    claimableRwaRaw = vaultBalanceRaw;
+                  }
+                } catch (error) {
+                  if (!isAccountMissingError(error)) {
+                    console.error(
+                      "Failed to fetch RWA vault balance",
+                      error,
+                    );
+                  }
+                }
+              }
+            }
+
+            if (rwaProgram) {
+              try {
+                const mintStateSeed = utils.bytes.utf8.encode("state");
+                const ledgerSeed = utils.bytes.utf8.encode("ledger");
+                const vaultSeed = utils.bytes.utf8.encode("vault");
+
+                const [mintStatePda] = PublicKey.findProgramAddressSync(
+                  [mintStateSeed, rwaMintPublicKey.toBuffer()],
+                  rwaProgram.programId,
+                );
+
+                const mintState = await rwaProgram.account.mintState.fetch(
+                  mintStatePda,
+                );
+
+                const [holderLedgerPda] = PublicKey.findProgramAddressSync(
+                  [ledgerSeed, publicKey.toBuffer(), rwaMintPublicKey.toBuffer()],
+                  rwaProgram.programId,
+                );
+
+                let holderLedger:
+                  | Awaited<ReturnType<typeof rwaProgram.account.holderLedger.fetch>>
+                  | null = null;
+
+                try {
+                  holderLedger = await rwaProgram.account.holderLedger.fetch(
+                    holderLedgerPda,
+                  );
+                } catch (error) {
+                  if (!isAccountMissingError(error)) {
+                    throw error;
+                  }
+                }
+
+                const holderTokenAta = getAssociatedTokenAddressSync(
+                  rwaMintPublicKey,
+                  publicKey,
+                );
+
+                let holderTokenAmount = BigInt(0);
+
+                try {
+                  const holderTokenBalance =
+                    await provider.connection.getTokenAccountBalance(
+                      holderTokenAta,
+                    );
+                  holderTokenAmount = BigInt(holderTokenBalance.value.amount);
+                } catch (error) {
+                  if (!isAccountMissingError(error)) {
+                    console.error("Failed to load holder token balance", error);
+                  }
+                }
+
+                const mintSupplyBigInt = toBigInt(
+                  rwaMintInfo ? rwaMintInfo.supply : 0,
+                );
+
+                const nowTs = BigInt(Math.floor(Date.now() / 1000));
+                const lastIndexUpdateTs = toBigInt(mintState.lastIndexUpdateTs);
+                const globalIndexInitial = toBigInt(mintState.globalIndex);
+                const accRewardPerIndex = toBigInt(mintState.accRewardPerIndex);
+
+                let globalIndexAdvanced = globalIndexInitial;
+                const dt = nowTs > lastIndexUpdateTs ? nowTs - lastIndexUpdateTs : BigInt(0);
+
+                if (dt > BigInt(0) && mintSupplyBigInt > BigInt(0)) {
+                  globalIndexAdvanced += (dt * SCALE_BIGINT) / mintSupplyBigInt;
+                }
+
+                let pendingIndexCredits = holderLedger
+                  ? toBigInt(holderLedger.pendingIndexCredits)
+                  : BigInt(0);
+                const lastIndexApplied = holderLedger
+                  ? toBigInt(holderLedger.lastIndex)
+                  : BigInt(0);
+                const deltaIndex = globalIndexAdvanced - lastIndexApplied;
+
+                if (deltaIndex > BigInt(0) && holderTokenAmount > BigInt(0)) {
+                  pendingIndexCredits += holderTokenAmount * deltaIndex;
+                }
+
+                let pendingRewards = holderLedger
+                  ? toBigInt(holderLedger.pendingRewards)
+                  : BigInt(0);
+                const lastAccApplied = holderLedger
+                  ? toBigInt(holderLedger.lastAccPerIndexApplied)
+                  : BigInt(0);
+                const deltaAcc = accRewardPerIndex - lastAccApplied;
+
+                if (deltaAcc > BigInt(0) && pendingIndexCredits > BigInt(0)) {
+                  pendingRewards += (pendingIndexCredits * deltaAcc) / SCALE_BIGINT;
+                }
+
+                claimableYieldRawBigInt = pendingRewards;
+
+                const [yieldVaultPda] = PublicKey.findProgramAddressSync(
+                  [vaultSeed, rwaMintPublicKey.toBuffer()],
+                  rwaProgram.programId,
+                );
+
+                try {
+                  const vaultBalance =
+                    await provider.connection.getTokenAccountBalance(
+                      yieldVaultPda,
+                    );
+                  const vaultBalanceRaw = BigInt(vaultBalance.value.amount);
+
+                  if (claimableYieldRawBigInt > vaultBalanceRaw) {
+                    claimableYieldRawBigInt = vaultBalanceRaw;
+                  }
+                } catch (error) {
+                  if (!isAccountMissingError(error)) {
+                    console.error("Failed to fetch yield vault balance", error);
+                  }
+                }
+              } catch (error) {
+                if (!isAccountMissingError(error)) {
+                  console.error("Failed to compute yield claimable", error);
+                }
+              }
+            }
+          } catch (error) {
+            console.error("Failed to load RWA mint info", error);
+          }
+        }
+
+        if (!isActive) {
+          return;
+        }
+
+        const effectiveRwaDecimals =
+          rwaMintDecimals ?? depositMintInfo.decimals;
+        setRwaMintDecimalsState(effectiveRwaDecimals);
+
+        const claimableYieldRawBn = new BN(claimableYieldRawBigInt.toString());
+
+        setDepositorInfoStats({
+          depositedUsdc: depositedRaw,
+          claimableRwa: claimableRwaRaw,
+          claimableYield: claimableYieldRawBn,
+        });
+      } catch (error) {
+        if (!isAccountMissingError(error)) {
+          console.error("Failed to fetch depositor info", error);
+        }
+
+        resetDepositorInfo();
+      } finally {
+        if (isActive) {
+          setIsDepositorInfoLoading(false);
+        }
+      }
+    };
+
+    void fetchDepositorInfo();
+
+    return () => {
+      isActive = false;
+    };
+  }, [
+    connected,
+    publicKey,
+    program,
+    provider,
+    resolvedParams.id,
+    pool,
+    depositSignature,
+    rwaProgram,
+  ]);
 
   if (isLoadingPool) {
     return (
@@ -336,6 +725,7 @@ export default function FundingPoolDetailPage({
           systemProgram: SystemProgram.programId,
           tokenProgram: TOKEN_PROGRAM_ID,
           associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          depositMint: depositMintPublicKey,
         });
 
       if (instructions.length > 0) {
@@ -411,6 +801,17 @@ export default function FundingPoolDetailPage({
       : progressPercentage.toFixed(0);
 
   const tabs = ["Overview", "Details", "Impact", "Calculate Your Returns"];
+
+  const hasRedeemableRwa = depositorInfoStats.claimableRwa.gt(new BN(0));
+  const hasClaimableYield = depositorInfoStats.claimableYield.gt(new BN(0));
+  const isClaimAvailable = claimMode === "rwa" ? hasRedeemableRwa : hasClaimableYield;
+  const claimButtonLabel = claimMode === "rwa"
+    ? hasRedeemableRwa
+      ? "Redeem"
+      : "Redeem (Locked)"
+    : hasClaimableYield
+      ? "Claim Yield"
+      : "Claim Yield (Locked)";
 
   return (
     <div className="page-wrapper">
@@ -649,7 +1050,7 @@ export default function FundingPoolDetailPage({
                               onClick={() => setActiveInvestTab("Claim")}
                               style={{ cursor: "pointer" }}
                             >
-                              Claim
+                              Redeem & Claim
                             </span>
                           </div>
                           {activeInvestTab === "Invest" && (
@@ -687,8 +1088,7 @@ export default function FundingPoolDetailPage({
                                       alt="USDC"
                                       className="coin-icon-img"
                                       width={24}
-                                      height={24}
-                                    />
+                                      height={24} />
                                   </div>
                                   <span className="coin-symbol">USDC</span>
                                 </div>
@@ -741,28 +1141,65 @@ export default function FundingPoolDetailPage({
                             <div className="claim-info-section">
                               <div className="claim-info-item">
                                 <span className="text-14 text-medium">
-                                  Locked USDC
+                                  Invested
                                 </span>
                                 <span className="text-14 text-bold text-dark">
-                                  1,250.00 USDC
+                                  {isDepositorInfoLoading
+                                    ? "Loading..."
+                                    : `${parseTokenAmountUI(
+                                      depositorInfoStats.depositedUsdc,
+                                      depositMintDecimals,
+                                      2,
+                                    )} ${usdcCoin?.symbol ?? "USDC"}`}
                                 </span>
                               </div>
                               <div className="claim-info-item">
                                 <span className="text-14 text-medium">
-                                  Claimable Amount
+                                  Redeemable CF-WIND1
                                 </span>
                                 <span className="text-14 text-bold text-dark">
-                                  850.00 USDC
+                                  {isDepositorInfoLoading
+                                    ? "Loading..."
+                                    : `${parseTokenAmountUI(
+                                      depositorInfoStats.claimableRwa,
+                                      rwaMintDecimalsState,
+                                      2,
+                                    )} ${RWA_SYMBOL}`}
                                 </span>
                               </div>
                               <div className="claim-info-item">
                                 <span className="text-14 text-medium">
-                                  Reward
+                                  Claimable Yield (USDC)
                                 </span>
                                 <span className="text-14 text-bold text-green">
-                                  125.50 USDC
+                                  {isDepositorInfoLoading
+                                    ? "Loading..."
+                                    : `${parseTokenAmountUI(
+                                      depositorInfoStats.claimableYield,
+                                      depositMintDecimals,
+                                      2,
+                                    )} ${usdcCoin?.symbol ?? "USDC"}`}
                                 </span>
                               </div>
+                            </div>
+
+                            <div className="invest-tabs claim-mode-tabs">
+                              <span
+                                className={`invest-tab ${claimMode === "rwa" ? "invest-tab-active" : ""
+                                  }`}
+                                onClick={() => setClaimMode("rwa")}
+                                style={{ cursor: "pointer" }}
+                              >
+                                Redeem CF-WIND1
+                              </span>
+                              <span
+                                className={`invest-tab ${claimMode === "yield" ? "invest-tab-active" : ""
+                                  }`}
+                                onClick={() => setClaimMode("yield")}
+                                style={{ cursor: "pointer" }}
+                              >
+                                Claim Yield (USDC)
+                              </span>
                             </div>
 
                             <div className="invest-input-section">
@@ -771,47 +1208,107 @@ export default function FundingPoolDetailPage({
                                   type="number"
                                   step="0.01"
                                   min="0.01"
-                                  value={claimAmount}
-                                  onChange={(e) =>
-                                    setClaimAmount(e.target.value)
+                                  value={
+                                    claimMode === "rwa"
+                                      ? claimRwaAmount
+                                      : claimYieldAmount
                                   }
+                                  onChange={(e) => {
+                                    const nextValue = e.target.value;
+                                    if (claimMode === "rwa") {
+                                      setClaimRwaAmount(nextValue);
+                                    } else {
+                                      setClaimYieldAmount(nextValue);
+                                    }
+                                  }}
                                   placeholder="0.00"
                                   className="invest-amount-input"
                                 />
                                 <div className="coin-selector-invest">
                                   <div className="coin-icon-wrapper">
                                     <Image
-                                      src={usdcCoin?.icon || "/assets/usdc.png"}
-                                      alt="USDC"
+                                      src={
+                                        claimMode === "rwa"
+                                          ? cfWindCoin?.icon || pool?.image || "/assets/cf-wind1.avif"
+                                          : usdcCoin?.icon || "/assets/usdc.png"
+                                      }
+                                      alt={
+                                        claimMode === "rwa"
+                                          ? cfWindCoin?.symbol ?? RWA_SYMBOL
+                                          : usdcCoin?.symbol ?? "USDC"
+                                      }
                                       className="coin-icon-img"
                                       width={24}
-                                      height={24}
-                                    />
+                                      height={24} />
                                   </div>
-                                  <span className="coin-symbol">USDC</span>
+                                  <span className="coin-symbol">
+                                    {claimMode === "rwa"
+                                      ? RWA_SYMBOL
+                                      : usdcCoin?.symbol ?? "USDC"}
+                                  </span>
                                 </div>
                               </div>
 
                               <div className="balance-info">
                                 <span className="balance-text">
-                                  850.00 USDC available
+                                  {isDepositorInfoLoading
+                                    ? "Loading availability..."
+                                    : claimMode === "rwa"
+                                      ? `${parseTokenAmountUI(
+                                        depositorInfoStats.claimableRwa,
+                                        rwaMintDecimalsState,
+                                        2,
+                                      )} ${RWA_SYMBOL} available`
+                                      : `${parseTokenAmountUI(
+                                        depositorInfoStats.claimableYield,
+                                        depositMintDecimals,
+                                        2,
+                                      )} ${usdcCoin?.symbol ?? "USDC"} available`}
                                 </span>
-                                <button className="max-button">Max</button>
+                                <button
+                                  className="max-button"
+                                  onClick={() => {
+                                    if (isDepositorInfoLoading) {
+                                      return;
+                                    }
+                                    if (claimMode === "rwa") {
+                                      setClaimRwaAmount(
+                                        formatTokenAmountPlain(
+                                          depositorInfoStats.claimableRwa,
+                                          rwaMintDecimalsState,
+                                        ),
+                                      );
+                                    } else {
+                                      setClaimYieldAmount(
+                                        formatTokenAmountPlain(
+                                          depositorInfoStats.claimableYield,
+                                          depositMintDecimals,
+                                        ),
+                                      );
+                                    }
+                                  }}
+                                >
+                                  Max
+                                </button>
                               </div>
                             </div>
 
                             <button
-                              className="deposit-button bg-linear-green claim-button-disabled"
-                              disabled
+                              className={`deposit-button bg-linear-green ${
+                                isClaimAvailable ? "" : "claim-button-disabled"
+                              }`}
+                              disabled={!isClaimAvailable}
                             >
-                              <Image
-                                src="/assets/Locked.svg"
-                                alt="Locked"
-                                className="claim-button-icon"
-                                width={16}
-                                height={16}
-                              />
-                              Claim (Locked)
+                              {!isClaimAvailable && (
+                                <Image
+                                  src="/assets/Locked.svg"
+                                  alt="Locked"
+                                  className="claim-button-icon"
+                                  width={16}
+                                  height={16}
+                                />
+                              )}
+                              {claimButtonLabel}
                             </button>
                           </>
                         )}
