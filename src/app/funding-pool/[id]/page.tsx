@@ -8,7 +8,6 @@ import { useState, use, useEffect } from "react";
 import { getFundingPoolById } from "@/lib/fundingPools";
 import type { FundingPool } from "@/lib/fundingPools";
 import { getCoinById } from "@/lib/data";
-import Image from "next/image";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { BN, utils } from "@coral-xyz/anchor";
@@ -105,8 +104,8 @@ export default function FundingPoolDetailPage({
 }: FundingPoolPageProps) {
   const [activeTab, setActiveTab] = useState("Overview");
   const [activeInvestTab, setActiveInvestTab] = useState("Invest");
-  const [initialInvestment, setInitialInvestment] = useState(100);
-  const [investmentDuration, setInvestmentDuration] = useState(100);
+  const [initialInvestment, setInitialInvestment] = useState(5000);
+  const [investmentDuration, setInvestmentDuration] = useState(3);
   const [depositAmount, setDepositAmount] = useState("");
   const [claimMode, setClaimMode] = useState<"rwa" | "yield">("rwa");
   const [claimRwaAmount, setClaimRwaAmount] = useState("");
@@ -1034,13 +1033,11 @@ export default function FundingPoolDetailPage({
                   style={animations.cardEntrance(0.2).style}
                 >
                   <div className="gap-12">
-                    <Image
+                    <img
                       src={pool.image}
                       loading="lazy"
                       alt={pool.name}
                       className="assets-single-image border-radius-12"
-                      width={100}
-                      height={100}
                     />
                     <div className="asset-tabs">
                       <div className="asset-tab-links border-radius-12">
@@ -1067,29 +1064,6 @@ export default function FundingPoolDetailPage({
                                 <p>{section.content}</p>
                               </div>
                             ))}
-                            <div className="grid-2 grid-gap-20">
-                              {pool.team.map((member, i) => (
-                                <div
-                                  key={i}
-                                  className="asset-tea-item border-radius-12"
-                                >
-                                  <Image
-                                    src={member.image}
-                                    loading="lazy"
-                                    alt={member.name}
-                                    className="asset-team-image"
-                                    width={50}
-                                    height={50}
-                                  />
-                                  <div className="gap-12">
-                                    <span className="text-20">
-                                      {member.name}
-                                    </span>
-                                    <span>{member.role}</span>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
                           </div>
                         )}
 
@@ -1122,16 +1096,16 @@ export default function FundingPoolDetailPage({
                                 <RangeSlider
                                   label="Initial Investment"
                                   value={initialInvestment}
-                                  min={10}
-                                  max={10000}
-                                  step={10}
+                                  min={100}
+                                  max={100000}
+                                  step={100}
                                   onChange={setInitialInvestment}
                                 />
                                 <RangeSlider
-                                  label="Investment Duration"
+                                  label="Investment Duration (Years)"
                                   value={investmentDuration}
                                   min={1}
-                                  max={120}
+                                  max={25}
                                   step={1}
                                   onChange={setInvestmentDuration}
                                 />
@@ -1148,8 +1122,8 @@ export default function FundingPoolDetailPage({
                                     $
                                     {(
                                       initialInvestment *
-                                      (investmentDuration / 12) *
-                                      0.1
+                                      investmentDuration *
+                                      (pool.calculator.expectedYield / 100)
                                     ).toFixed(2)}
                                   </span>
                                 </div>
@@ -1297,12 +1271,10 @@ export default function FundingPoolDetailPage({
                                 />
                                 <div className="coin-selector-invest">
                                   <div className="coin-icon-wrapper">
-                                    <Image
+                                    <img
                                       src={usdcCoin?.icon || "/assets/usdc.png"}
                                       alt="USDC"
                                       className="coin-icon-img"
-                                      width={24}
-                                      height={24}
                                     />
                                   </div>
                                   <span className="coin-symbol">USDC</span>
@@ -1455,7 +1427,7 @@ export default function FundingPoolDetailPage({
                                 />
                                 <div className="coin-selector-invest">
                                   <div className="coin-icon-wrapper">
-                                    <Image
+                                    <img
                                       src={
                                         claimMode === "rwa"
                                           ? cfWindCoin?.icon ||
@@ -1469,8 +1441,6 @@ export default function FundingPoolDetailPage({
                                           : usdcCoin?.symbol ?? "USDC"
                                       }
                                       className="coin-icon-img"
-                                      width={24}
-                                      height={24}
                                     />
                                   </div>
                                   <span className="coin-symbol">
@@ -1535,12 +1505,10 @@ export default function FundingPoolDetailPage({
                               onClick={handleRedeem}
                             >
                               {!isClaimAvailable && (
-                                <Image
+                                <img
                                   src="/assets/Locked.svg"
                                   alt="Locked"
                                   className="claim-button-icon"
-                                  width={16}
-                                  height={16}
                                 />
                               )}
                               {isRedeeming ? "Redeeming..." : claimButtonLabel}

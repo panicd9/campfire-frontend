@@ -65,133 +65,68 @@ export const fundingPools: FundingPool[] = [
   {
     id: "0",
     name: "Wind Farm - Single Income",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt",
-    location: "Galway, Ireland",
+    description: "Campfire has agreed to purchase a 40% stake in ESBs Ballybrack wind farm located in county Galway. This asset went live in 2020 and has approx 25 years left on the manufacturers lifespan.",
+    location: "Ballybrack, Galway, Ireland",
     category: "Commercial Wind",
-    image: "/assets/683468326de746c20d499e7a7aebf413_163.svg",
+    image: "/assets/wind-farm.avif",
     fundingTarget: 6000000,
-    fundingRaised: 5400000,
-    fundingProgress: 90,
+    fundingRaised: 4200000,
+    fundingProgress: 70,
     currency: "USDC",
     features: [
       "15MW of Commercial Wind",
+      "8 Horizontal Axis Wind Turbines",
+      "1.9MW per Turbine Capacity",
+      "25 Year Lifespan Remaining"
     ],
-    team: [
-      { name: "John Doe", role: "CEO & Founder", image: "/assets/683468326de746c20d499e7a7aebf413_163.svg" },
-      { name: "Jane Smith", role: "CTO", image: "/assets/683468326de746c20d499e7a7aebf413_163.svg" },
-      { name: "Mike Johnson", role: "CFO", image: "/assets/683468326de746c20d499e7a7aebf413_163.svg" },
-      { name: "Sarah Wilson", role: "Head of Operations", image: "/assets/683468326de746c20d499e7a7aebf413_163.svg" },
-      { name: "David Brown", role: "Lead Engineer", image: "/assets/683468326de746c20d499e7a7aebf413_163.svg" },
-      { name: "Lisa Davis", role: "Marketing Director", image: "/assets/683468326de746c20d499e7a7aebf413_163.svg" }
-    ],
+    team: [],
     overview: [
       {
-        title: "What is Lorem Ipsum?",
-        content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+        title: "Project Overview",
+        content: "Campfire has agreed to purchase a 40% stake in ESBs Ballybrack wind farm located in county Galway. This asset went live in 2020 and has approx 25 years left on the manufacturers lifespan. ESB are Ireland's primary grid operator and they are technical experts in energy infrastructure. The site contains 8 horizontal axis wind turbines which have a capacity of 1.9MW each, giving the site just over 15MW of potential capacity."
       },
       {
-        title: "Why do we use it?",
-        content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+        title: "Operating History",
+        content: "The O&M contract will be maintained by ESB and this contract is signed until 2030. The Ballybrack site outputs approximately 2.35 GWh per year and has had 5 years of operating history with an average of only 2 days of downtime per year."
+      },
+      {
+        title: "Partnership & Operations",
+        content: "ESB Energy serves as our technical partner and grid operator, bringing decades of expertise in energy infrastructure. Campfire Engineering collaborates on efficiency and durability optimization to maximize returns. ESB Maintenance maintains the O&M contract until 2030, ensuring reliable operations with their comprehensive maintenance services."
       }
     ],
     details: [
       {
         title: "Technical Specifications",
-        content: "Detailed technical information about the wind farm project including turbine specifications, grid connection details, and maintenance protocols."
+        content: "ESB and Campfire are collaborating with our engineers for efficiency and durability while reducing risks and increasing returns on the Ballycrack wind farm. ESB offers a comprehensive PPM schedule (planned preventive maintenance) as well as corrective and predictive maintenance services to ensure the continuous performance of our wind farms and minimising downtime, by utilising technology like remote monitoring. By adopting our solutions, companies can transform operational expenses into sustainable investments, contributing to a greener future."
       },
       {
-        title: "Financial Structure",
-        content: "Complete breakdown of the financial structure, revenue sharing model, and investment terms."
+        title: "Business Model",
+        content: "Diversified revenue streams prioritising personalised solutions. Contract and Offtaker: ESB is an ideal partner for this asset because their systems for commercial and industrial clients are built on longterms contracts generating revenue from power intensive clients like commercial offices and national infrastructure like street lights and government owned EVs and misc equipment. ESB revenue strategy is grounded in feasibility studies tailored to the specific energy needs of each client and the location they are in. When there is surplus energy during periods of low demand ESB ensures none of that energy goes to waste by partnering with nearby pumped storage energy stations to ensure we get maximum profit from the natural resources the wind farm generates. ESB is driven by direct sales channels, strategic partnerships, participation in industry events, and an active digital presence that raises awareness about the benefits of wind energy."
       }
     ],
     impact: [
       {
         title: "Environmental Impact",
-        content: "This project will generate clean energy equivalent to powering 15,000 homes annually, reducing CO2 emissions by 45,000 tons per year."
+        content: "Throughout the next 25 year lifespan of the project, Ballybrack will produce: 15,722 GWh of renewable energy for the Irish residential market which is distributed by ESB themselves as the grid connectors and offtaker client. Ballybrack will avert 668,200 tonnes of CO2. Calculated as 157,220 MWh * 0.425 tCO2 / MWh = 6,682 tonnes of CO2 averted. This figure corresponds to the amount of CO2 avoided based on the electrical energy generated during a specific period that Campfire investors are purchasing this minority share in the asset (measured in MWh). The average CO2 emission factor of the SIN (National Interconnected System) for the same period"
       },
       {
-        title: "Economic Impact",
-        content: "The project will create 50+ local jobs during construction and 15 permanent positions for ongoing operations."
+        title: "UN Sustainable Development Goals",
+        content: "Concrete contributions to a greener planet and the UN's SDG. ESBs projects generate renewable energy that directly replaces fossil fuel-based energy within the grid, significantly reducing CO₂ emissions. These efforts align with the following UN Sustainable Development Goals (SDGs)."
       }
     ],
     calculator: {
-      initialInvestment: 100,
-      investmentDuration: 100,
-      expectedYield: 43.25,
-      description: "The total yield generated throughout your investment in Surya project, based on the predicted annual yields."
+      initialInvestment: 1000,
+      investmentDuration: 25,
+      expectedYield: 11.5,
+      description: "The total yield generated throughout your investment in Ballybrack wind farm project, based on the 11.5% annual yield over the 25-year project lifespan."
     },
     summary: {
-      projectedAnnually: "43% Yield",
-      duration: "3+ Years",
-      beingRaised: 150000,
-      instalments: "Monthly",
-      description: "DeCharge operates a Solana-powered EV charging network with AI-driven placement. $150K funds 19 chargers across three stations on several busy Indian highways.",
-      payoutDate: "First investor payout expected 20th January 2026"
-    }
-  },
-  {
-    chainData: {
-      id: new BN(1),
-      creator: new PublicKey("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"),
-      depositMint: new PublicKey("So11111111111111111111111111111111111111112"),
-      depositVault: new PublicKey("4Nd1mY7bG3t6b8v4Y6SLD1d2nQ8V5Zc4U5r7h6v3KJ8o"),
-      depositLimit: new BN(8_000_000 * 10**6),
-      totalDeposited: new BN(7_152_124 * 10**6),
-      issued: true,
-      rwaMint: new PublicKey("3Nd1mY7bG3t6b8v4Y6SLD1d2nQ8V5Zc4U5r7h6v3KJ8o"),
-      rwaVault: new PublicKey("5Nd1mY7bG3t6b8v4Y6SLD1d2nQ8V5Zc4U5r7h6v3KJ8o"),
-      rwaTotalSupply: new BN(1_000_000 * 10**6),
-      rwaTransferHookProgram: null,
-    },
-    id: "1",
-    name: "Solar Farm - Green Energy",
-    description: "Advanced solar energy project with cutting-edge technology",
-    location: "Madrid, Spain",
-    category: "Solar Energy",
-    image: "/assets/683468326de746c20d499e7a7aebf413_163.svg",
-    fundingTarget: 8000000,
-    fundingRaised: 6400000,
-    fundingProgress: 80,
-    currency: "USDC",
-    features: [
-      "50MW Solar Installation",
-      "Battery Storage System"
-    ],
-    team: [
-      { name: "Carlos Rodriguez", role: "Project Manager", image: "/assets/683468326de746c20d499e7a7aebf413_163.svg" },
-      { name: "Ana Garcia", role: "Technical Lead", image: "/assets/683468326de746c20d499e7a7aebf413_163.svg" }
-    ],
-    overview: [
-      {
-        title: "Project Overview",
-        content: "This solar farm project represents the future of renewable energy in Spain."
-      }
-    ],
-    details: [
-      {
-        title: "Solar Panel Specifications",
-        content: "High-efficiency monocrystalline panels with 25-year warranty."
-      }
-    ],
-    impact: [
-      {
-        title: "Carbon Reduction",
-        content: "Expected to reduce CO2 emissions by 60,000 tons annually."
-      }
-    ],
-    calculator: {
-      initialInvestment: 100,
-      investmentDuration: 100,
-      expectedYield: 38.50,
-      description: "Expected returns based on current energy prices and government incentives."
-    },
-    summary: {
-      projectedAnnually: "38% Yield",
-      duration: "5+ Years",
-      beingRaised: 200000,
-      instalments: "Quarterly",
-      description: "State-of-the-art solar farm with advanced tracking systems and energy storage.",
-      payoutDate: "First payout expected 15th March 2026"
+      projectedAnnually: "11.5% APY",
+      duration: "25 Years",
+      beingRaised: 6000000,
+      instalments: "Daily Monthly",
+      description: "Campfire has agreed to purchase a 40% stake in ESBs Ballybrack wind farm located in county Galway. This asset went live in 2020 and has approx 25 years left on the manufacturers lifespan.",
+      payoutDate: "First investor payout expected 1st February 2025"
     }
   }
 ];
