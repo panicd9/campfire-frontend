@@ -14,247 +14,6 @@ export type Crowdfunding = {
   },
   "instructions": [
     {
-      "name": "claim",
-      "discriminator": [
-        62,
-        198,
-        214,
-        193,
-        213,
-        159,
-        108,
-        210
-      ],
-      "accounts": [
-        {
-          "name": "pool",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  112,
-                  111,
-                  111,
-                  108
-                ]
-              },
-              {
-                "kind": "arg",
-                "path": "poolId"
-              }
-            ]
-          }
-        },
-        {
-          "name": "poolAuthority",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  112,
-                  111,
-                  111,
-                  108,
-                  45,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
-                ]
-              },
-              {
-                "kind": "arg",
-                "path": "poolId"
-              }
-            ]
-          }
-        },
-        {
-          "name": "rwaVault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "poolAuthority"
-              },
-              {
-                "kind": "account",
-                "path": "tokenProgram"
-              },
-              {
-                "kind": "account",
-                "path": "rwaMint"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
-        },
-        {
-          "name": "rwaMint",
-          "writable": true
-        },
-        {
-          "name": "userRwaAta",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "user"
-              },
-              {
-                "kind": "account",
-                "path": "tokenProgram"
-              },
-              {
-                "kind": "account",
-                "path": "rwaMint"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
-        },
-        {
-          "name": "depositorInfo",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  100,
-                  101,
-                  112,
-                  111,
-                  115,
-                  105,
-                  116,
-                  111,
-                  114,
-                  45,
-                  105,
-                  110,
-                  102,
-                  111
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "user"
-              },
-              {
-                "kind": "arg",
-                "path": "poolId"
-              }
-            ]
-          }
-        },
-        {
-          "name": "user",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "systemProgram",
-          "address": "11111111111111111111111111111111"
-        },
-        {
-          "name": "tokenProgram"
-        },
-        {
-          "name": "associatedTokenProgram",
-          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-        }
-      ],
-      "args": [
-        {
-          "name": "poolId",
-          "type": "u64"
-        }
-      ]
-    },
-    {
       "name": "createPool",
       "discriminator": [
         233,
@@ -835,6 +594,12 @@ export type Crowdfunding = {
           }
         },
         {
+          "name": "transferHookProgram"
+        },
+        {
+          "name": "extraAccountMetas"
+        },
+        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         },
@@ -850,10 +615,247 @@ export type Crowdfunding = {
         {
           "name": "poolId",
           "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "redeem",
+      "discriminator": [
+        184,
+        12,
+        86,
+        149,
+        70,
+        196,
+        97,
+        225
+      ],
+      "accounts": [
+        {
+          "name": "pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "poolId"
+              }
+            ]
+          }
         },
         {
-          "name": "transferHookProgramId",
-          "type": "pubkey"
+          "name": "poolAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108,
+                  45,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "poolId"
+              }
+            ]
+          }
+        },
+        {
+          "name": "rwaVault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "poolAuthority"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "rwaMint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "rwaMint",
+          "writable": true
+        },
+        {
+          "name": "userRwaAta",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "rwaMint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "depositorInfo",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  111,
+                  114,
+                  45,
+                  105,
+                  110,
+                  102,
+                  111
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "arg",
+                "path": "poolId"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "tokenProgram"
+        },
+        {
+          "name": "associatedTokenProgram",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        }
+      ],
+      "args": [
+        {
+          "name": "poolId",
+          "type": "u64"
         }
       ]
     }
@@ -902,53 +904,15 @@ export type Crowdfunding = {
   "errors": [
     {
       "code": 6000,
-      "name": "unauthorizedAdmin",
-      "msg": "Only the configured admin can perform this action"
+      "name": "zeroDeltaIndex"
     },
     {
       "code": 6001,
-      "name": "mathOverflow",
-      "msg": "Math overflow"
+      "name": "overflow"
     },
     {
       "code": 6002,
-      "name": "invalidAmount",
-      "msg": "Invalid amount"
-    },
-    {
-      "code": 6003,
-      "name": "alreadyIssued",
-      "msg": "RWA already issued for this pool"
-    },
-    {
-      "code": 6004,
-      "name": "notIssued",
-      "msg": "RWA not yet issued"
-    },
-    {
-      "code": 6005,
-      "name": "invalidRwaMint",
-      "msg": "Invalid RWA mint for this pool"
-    },
-    {
-      "code": 6006,
-      "name": "invalidDepositMint",
-      "msg": "Invalid deposit mint for this pool"
-    },
-    {
-      "code": 6007,
-      "name": "nothingToClaim",
-      "msg": "Nothing to claim"
-    },
-    {
-      "code": 6008,
-      "name": "depositsClosed",
-      "msg": "Deposits are closed after issuance"
-    },
-    {
-      "code": 6009,
-      "name": "poolIdMismatch",
-      "msg": "Pool id does not match account seed"
+      "name": "unauthorized"
     }
   ],
   "types": [

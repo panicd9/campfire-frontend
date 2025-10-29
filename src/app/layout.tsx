@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import WalletContextProvider from "@/components/Global/WalletProvider";
+import { Buffer } from 'buffer'; // ESM import
+
+if (typeof window !== 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (window as any).Buffer = Buffer;
+}
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

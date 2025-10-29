@@ -435,11 +435,6 @@ export type RwaTransferHook = {
           "name": "mint"
         },
         {
-          "name": "mintAuthority",
-          "writable": true,
-          "signer": true
-        },
-        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         },

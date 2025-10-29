@@ -18,9 +18,11 @@ import {
   TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountInstruction,
   getAssociatedTokenAddressSync,
+  getExtraAccountMetaAddress,
   getMint,
 } from "@solana/spl-token";
 import {
+  AccountMeta,
   PublicKey,
   SystemProgram,
   TransactionInstruction,
@@ -766,6 +768,11 @@ export default function FundingPoolDetailPage({
       return;
     }
 
+    if (!rwaProgram) {
+      setRedeemError("RWA transfer hook program is not ready. Please reconnect and try again.");
+      return;
+    }
+
     if (!pool) {
       setRedeemError("Pool information not loaded.");
       return;
@@ -839,9 +846,44 @@ export default function FundingPoolDetailPage({
         ASSOCIATED_TOKEN_PROGRAM_ID,
       );
 
+      const extraMetasAccount = getExtraAccountMetaAddress(
+        rwaMint,
+        rwaProgram.programId,
+      );
+
+      const mintStateSeed = utils.bytes.utf8.encode("state");
+      const ledgerSeed = utils.bytes.utf8.encode("ledger");
+
+      const [mintStatePda] = PublicKey.findProgramAddressSync(
+        [mintStateSeed, rwaMint.toBuffer()],
+        rwaProgram.programId,
+      );
+
+      const [sourceLedgerPda] = PublicKey.findProgramAddressSync(
+        [ledgerSeed, poolAuthorityPda.toBuffer(), rwaMint.toBuffer()],
+        rwaProgram.programId,
+      );
+
+      const [destinationLedgerPda] = PublicKey.findProgramAddressSync(
+        [ledgerSeed, publicKey.toBuffer(), rwaMint.toBuffer()],
+        rwaProgram.programId,
+      );
+
+      const remainingAccounts: AccountMeta[] = [
+        { pubkey: rwaProgram.programId, isSigner: false, isWritable: false },
+        { pubkey: rwaVaultAta, isSigner: false, isWritable: true },
+        { pubkey: rwaMint, isSigner: false, isWritable: false },
+        { pubkey: userRwaAta, isSigner: false, isWritable: true },
+        { pubkey: poolAuthorityPda, isSigner: false, isWritable: false },
+        { pubkey: extraMetasAccount, isSigner: false, isWritable: false },
+        { pubkey: mintStatePda, isSigner: false, isWritable: true },
+        { pubkey: sourceLedgerPda, isSigner: false, isWritable: true },
+        { pubkey: destinationLedgerPda, isSigner: false, isWritable: true },
+      ];
+
       // Execute redeem
       const signature = await program.methods
-        .claim(poolId)
+        .redeem(poolId)
         .accountsStrict({
           pool: poolPda,
           poolAuthority: poolAuthorityPda,
@@ -854,7 +896,10 @@ export default function FundingPoolDetailPage({
           tokenProgram: TOKEN_2022_PROGRAM_ID,
           associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         })
-        .rpc();
+        .remainingAccounts(remainingAccounts)
+        .rpc({
+          // skipPreflight: true,
+        });
 
       setRedeemSignature(signature);
       console.log("Redeem successful! Transaction:", signature);
@@ -1422,9 +1467,8 @@ export default function FundingPoolDetailPage({
                             </div>
 
                             <button
-                              className={`deposit-button bg-linear-green ${
-                                isClaimAvailable ? "" : "claim-button-disabled"
-                              }`}
+                              className={`deposit-button bg-linear-green ${isClaimAvailable ? "" : "claim-button-disabled"
+                                }`}
                               disabled={!isClaimAvailable || isRedeeming}
                               onClick={handleRedeem}
                             >
