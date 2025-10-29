@@ -23,7 +23,7 @@ export default function Navbar() {
             <Link href="/">
               <img
                 src="/assets/532231e812bd08956634e20dcd30db9d_30726.png"
-                loading="lazy"
+                loading="eager"
                 alt="Campfire Logo"
                 className="navbar-logo"
               />

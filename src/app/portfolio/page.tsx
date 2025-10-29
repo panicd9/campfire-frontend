@@ -5,6 +5,7 @@ import PortfolioAssetCard from "@/components/portfolio/PortfolioAssetCard";
 import PortfolioStats from "@/components/portfolio/PortfolioStats";
 import PortfolioCharts from "@/components/portfolio/PortfolioCharts";
 import { portfolioHoldings } from "@/lib/data";
+import { animations } from "@/lib/animations";
 
 export const metadata: Metadata = {
   title: "Portfolio | Campfire",
@@ -18,14 +19,27 @@ export default function Portfolio() {
         <section className="screen-wrapper">
           <div className="container">
             <div className="gap-32">
-              <div className="gap-16">
+              <div
+                className={`gap-16 ${animations.fadeIn(0).className}`}
+                style={animations.fadeIn(0).style}
+              >
                 <h1>Portfolio</h1>
               </div>
-              <div className="grey-box border-radius-12">
+              <div
+                className={`grey-box border-radius-12 ${
+                  animations.slideUp(0.1).className
+                }`}
+                style={animations.slideUp(0.1).style}
+              >
                 <div className="gap-8">
                   <PortfolioStats />
                   <PortfolioCharts />
-                  <div className="tablet-overflow-auto">
+                  <div
+                    className={`tablet-overflow-auto ${
+                      animations.slideUp(0.4).className
+                    }`}
+                    style={animations.slideUp(0.4).style}
+                  >
                     <div className="dashboard-table gap-8">
                       <div className="dahboard-header border-radius-12">
                         <div className="table-item-20">

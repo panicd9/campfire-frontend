@@ -36,6 +36,7 @@ import {
   parseTokenAmountUI,
   shortenSignature,
 } from "../../../../solana/utils";
+import { animations } from "@/lib/animations";
 
 const RWA_SYMBOL = "CF-WIND1";
 
@@ -112,16 +113,15 @@ export default function FundingPoolDetailPage({
   const [claimYieldAmount, setClaimYieldAmount] = useState("");
   const [isDepositing, setIsDepositing] = useState(false);
   const [depositError, setDepositError] = useState<string | null>(null);
-  const [depositSignature, setDepositSignature] = useState<string | null>(
-    null,
-  );
+  const [depositSignature, setDepositSignature] = useState<string | null>(null);
   const [userDepositBalance, setUserDepositBalance] = useState("0.000000");
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
-  const [depositorInfoStats, setDepositorInfoStats] = useState<DepositorInfoStats>({
-    depositedUsdc: new BN(0),
-    claimableRwa: new BN(0),
-    claimableYield: new BN(0),
-  });
+  const [depositorInfoStats, setDepositorInfoStats] =
+    useState<DepositorInfoStats>({
+      depositedUsdc: new BN(0),
+      claimableRwa: new BN(0),
+      claimableYield: new BN(0),
+    });
   const [depositMintDecimals, setDepositMintDecimals] = useState(6);
   const [rwaMintDecimalsState, setRwaMintDecimalsState] = useState(6);
   const [isDepositorInfoLoading, setIsDepositorInfoLoading] = useState(false);
@@ -218,7 +218,7 @@ export default function FundingPoolDetailPage({
         } else {
           const [poolPda] = PublicKey.findProgramAddressSync(
             [poolSeed, poolIdSeed],
-            program.programId,
+            program.programId
           );
 
           const onChainPool = await program.account.fundingPool.fetch(poolPda);
@@ -227,11 +227,11 @@ export default function FundingPoolDetailPage({
 
         const userDepositAta = getAssociatedTokenAddressSync(
           depositMintPublicKey,
-          publicKey,
+          publicKey
         );
 
         const userAtaInfo = await provider.connection.getAccountInfo(
-          userDepositAta,
+          userDepositAta
         );
 
         if (!userAtaInfo) {
@@ -242,7 +242,7 @@ export default function FundingPoolDetailPage({
         }
 
         const tokenBalance = await provider.connection.getTokenAccountBalance(
-          userDepositAta,
+          userDepositAta
         );
 
         if (!isActive) {
@@ -253,7 +253,7 @@ export default function FundingPoolDetailPage({
         const formatted = parseTokenAmountUI(
           new BN(tokenBalance.value.amount),
           decimals,
-          2,
+          2
         );
 
         setUserDepositBalance(formatted);
@@ -275,7 +275,15 @@ export default function FundingPoolDetailPage({
     return () => {
       isActive = false;
     };
-  }, [connected, publicKey, program, provider, resolvedParams.id, pool, depositSignature]);
+  }, [
+    connected,
+    publicKey,
+    program,
+    provider,
+    resolvedParams.id,
+    pool,
+    depositSignature,
+  ]);
 
   useEffect(() => {
     let isActive = true;
@@ -334,7 +342,7 @@ export default function FundingPoolDetailPage({
 
         const [poolPda] = PublicKey.findProgramAddressSync(
           [poolSeed, poolIdSeed],
-          program.programId,
+          program.programId
         );
 
         const onChainPool = await program.account.fundingPool.fetch(poolPda);
@@ -345,20 +353,20 @@ export default function FundingPoolDetailPage({
 
         const depositMintInfo = await getMint(
           provider.connection,
-          depositMintPublicKey,
+          depositMintPublicKey
         );
         setDepositMintDecimals(depositMintInfo.decimals);
 
         const [depositorInfoPda] = PublicKey.findProgramAddressSync(
           [depositorInfoSeed, publicKey.toBuffer(), poolIdSeed],
-          program.programId,
+          program.programId
         );
 
         let depositorInfo: { deposited: BN; claimed: BN } | null = null;
 
         try {
           depositorInfo = await program.account.depositorInfo.fetch(
-            depositorInfoPda,
+            depositorInfoPda
           );
         } catch (error) {
           if (!isAccountMissingError(error)) {
@@ -369,22 +377,28 @@ export default function FundingPoolDetailPage({
         const depositedRaw = depositorInfo?.deposited ?? new BN(0);
         const claimedRwaRaw = depositorInfo?.claimed ?? new BN(0);
 
-        const rwaMintPublicKey = (onChainPool.rwaMint ?? null) as
-          | PublicKey
-          | null;
-        const rwaVaultPublicKey = (onChainPool.rwaVault ?? null) as
-          | PublicKey
-          | null;
+        const rwaMintPublicKey = (onChainPool.rwaMint ??
+          null) as PublicKey | null;
+        const rwaVaultPublicKey = (onChainPool.rwaVault ??
+          null) as PublicKey | null;
 
         let rwaMintDecimals: number | null = null;
         let claimableRwaRaw = new BN(0);
         let claimableYieldRawBigInt = BigInt(0);
         let rwaMintInfo: Awaited<ReturnType<typeof getMint>> | null = null;
 
-        console.log("RWA Mint Public Key:", rwaMintPublicKey?.toBase58() ?? "null");
+        console.log(
+          "RWA Mint Public Key:",
+          rwaMintPublicKey?.toBase58() ?? "null"
+        );
         if (rwaMintPublicKey) {
           try {
-            rwaMintInfo = await getMint(provider.connection, rwaMintPublicKey, "confirmed", TOKEN_2022_PROGRAM_ID);
+            rwaMintInfo = await getMint(
+              provider.connection,
+              rwaMintPublicKey,
+              "confirmed",
+              TOKEN_2022_PROGRAM_ID
+            );
             rwaMintDecimals = rwaMintInfo.decimals;
 
             const totalDepositedRaw = onChainPool.totalDeposited as BN;
@@ -408,7 +422,7 @@ export default function FundingPoolDetailPage({
                 try {
                   const vaultBalance =
                     await provider.connection.getTokenAccountBalance(
-                      rwaVaultPublicKey,
+                      rwaVaultPublicKey
                     );
                   const vaultBalanceRaw = new BN(vaultBalance.value.amount);
 
@@ -417,10 +431,7 @@ export default function FundingPoolDetailPage({
                   }
                 } catch (error) {
                   if (!isAccountMissingError(error)) {
-                    console.error(
-                      "Failed to fetch RWA vault balance",
-                      error,
-                    );
+                    console.error("Failed to fetch RWA vault balance", error);
                   }
                 }
               }
@@ -434,25 +445,29 @@ export default function FundingPoolDetailPage({
 
                 const [mintStatePda] = PublicKey.findProgramAddressSync(
                   [mintStateSeed, rwaMintPublicKey.toBuffer()],
-                  rwaProgram.programId,
+                  rwaProgram.programId
                 );
 
                 const mintState = await rwaProgram.account.mintState.fetch(
-                  mintStatePda,
+                  mintStatePda
                 );
 
                 const [holderLedgerPda] = PublicKey.findProgramAddressSync(
-                  [ledgerSeed, publicKey.toBuffer(), rwaMintPublicKey.toBuffer()],
-                  rwaProgram.programId,
+                  [
+                    ledgerSeed,
+                    publicKey.toBuffer(),
+                    rwaMintPublicKey.toBuffer(),
+                  ],
+                  rwaProgram.programId
                 );
 
-                let holderLedger:
-                  | Awaited<ReturnType<typeof rwaProgram.account.holderLedger.fetch>>
-                  | null = null;
+                let holderLedger: Awaited<
+                  ReturnType<typeof rwaProgram.account.holderLedger.fetch>
+                > | null = null;
 
                 try {
                   holderLedger = await rwaProgram.account.holderLedger.fetch(
-                    holderLedgerPda,
+                    holderLedgerPda
                   );
                 } catch (error) {
                   if (!isAccountMissingError(error)) {
@@ -462,7 +477,7 @@ export default function FundingPoolDetailPage({
 
                 const holderTokenAta = getAssociatedTokenAddressSync(
                   rwaMintPublicKey,
-                  publicKey,
+                  publicKey
                 );
 
                 let holderTokenAmount = BigInt(0);
@@ -470,7 +485,7 @@ export default function FundingPoolDetailPage({
                 try {
                   const holderTokenBalance =
                     await provider.connection.getTokenAccountBalance(
-                      holderTokenAta,
+                      holderTokenAta
                     );
                   holderTokenAmount = BigInt(holderTokenBalance.value.amount);
                 } catch (error) {
@@ -480,7 +495,7 @@ export default function FundingPoolDetailPage({
                 }
 
                 const mintSupplyBigInt = toBigInt(
-                  rwaMintInfo ? rwaMintInfo.supply : 0,
+                  rwaMintInfo ? rwaMintInfo.supply : 0
                 );
 
                 const nowTs = BigInt(Math.floor(Date.now() / 1000));
@@ -489,7 +504,10 @@ export default function FundingPoolDetailPage({
                 const accRewardPerIndex = toBigInt(mintState.accRewardPerIndex);
 
                 let globalIndexAdvanced = globalIndexInitial;
-                const dt = nowTs > lastIndexUpdateTs ? nowTs - lastIndexUpdateTs : BigInt(0);
+                const dt =
+                  nowTs > lastIndexUpdateTs
+                    ? nowTs - lastIndexUpdateTs
+                    : BigInt(0);
 
                 if (dt > BigInt(0) && mintSupplyBigInt > BigInt(0)) {
                   globalIndexAdvanced += (dt * SCALE_BIGINT) / mintSupplyBigInt;
@@ -516,20 +534,21 @@ export default function FundingPoolDetailPage({
                 const deltaAcc = accRewardPerIndex - lastAccApplied;
 
                 if (deltaAcc > BigInt(0) && pendingIndexCredits > BigInt(0)) {
-                  pendingRewards += (pendingIndexCredits * deltaAcc) / SCALE_BIGINT;
+                  pendingRewards +=
+                    (pendingIndexCredits * deltaAcc) / SCALE_BIGINT;
                 }
 
                 claimableYieldRawBigInt = pendingRewards;
 
                 const [yieldVaultPda] = PublicKey.findProgramAddressSync(
                   [vaultSeed, rwaMintPublicKey.toBuffer()],
-                  rwaProgram.programId,
+                  rwaProgram.programId
                 );
 
                 try {
                   const vaultBalance =
                     await provider.connection.getTokenAccountBalance(
-                      yieldVaultPda,
+                      yieldVaultPda
                     );
                   const vaultBalanceRaw = BigInt(vaultBalance.value.amount);
 
@@ -638,7 +657,9 @@ export default function FundingPoolDetailPage({
     }
 
     if (!program || !provider) {
-      setDepositError("Wallet provider is not ready. Please reconnect and try again.");
+      setDepositError(
+        "Wallet provider is not ready. Please reconnect and try again."
+      );
       return;
     }
 
@@ -669,17 +690,17 @@ export default function FundingPoolDetailPage({
 
       const [poolPda] = PublicKey.findProgramAddressSync(
         [poolSeed, poolIdSeed],
-        program.programId,
+        program.programId
       );
 
       const [poolAuthority] = PublicKey.findProgramAddressSync(
         [poolAuthoritySeed, poolIdSeed],
-        program.programId,
+        program.programId
       );
 
       const [depositorInfo] = PublicKey.findProgramAddressSync(
         [depositorInfoSeed, publicKey.toBytes(), poolIdSeed],
-        program.programId,
+        program.programId
       );
 
       const poolAccount = await program.account.fundingPool.fetch(poolPda);
@@ -691,18 +712,18 @@ export default function FundingPoolDetailPage({
       const depositVaultAta = getAssociatedTokenAddressSync(
         depositMintPublicKey,
         poolAuthority,
-        true,
+        true
       );
 
       const userDepositAta = getAssociatedTokenAddressSync(
         depositMintPublicKey,
-        publicKey,
+        publicKey
       );
 
       const instructions: TransactionInstruction[] = [];
 
       const userAtaInfo = await provider.connection.getAccountInfo(
-        userDepositAta,
+        userDepositAta
       );
 
       if (!userAtaInfo) {
@@ -711,27 +732,25 @@ export default function FundingPoolDetailPage({
             publicKey,
             userDepositAta,
             publicKey,
-            depositMintPublicKey,
-          ),
+            depositMintPublicKey
+          )
         );
       }
 
       console.log("Depositing raw amount:", rawAmount.toString());
 
-      const method = program.methods
-        .deposit(poolId, rawAmount)
-        .accountsStrict({
-          user: publicKey,
-          pool: poolPda,
-          poolAuthority,
-          depositVault: depositVaultAta,
-          userDepositAta,
-          depositorInfo,
-          systemProgram: SystemProgram.programId,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          depositMint: depositMintPublicKey,
-        });
+      const method = program.methods.deposit(poolId, rawAmount).accountsStrict({
+        user: publicKey,
+        pool: poolPda,
+        poolAuthority,
+        depositVault: depositVaultAta,
+        userDepositAta,
+        depositorInfo,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        depositMint: depositMintPublicKey,
+      });
 
       if (instructions.length > 0) {
         method.preInstructions(instructions);
@@ -764,12 +783,16 @@ export default function FundingPoolDetailPage({
     }
 
     if (!program || !provider) {
-      setRedeemError("Wallet provider is not ready. Please reconnect and try again.");
+      setRedeemError(
+        "Wallet provider is not ready. Please reconnect and try again."
+      );
       return;
     }
 
     if (!rwaProgram) {
-      setRedeemError("RWA transfer hook program is not ready. Please reconnect and try again.");
+      setRedeemError(
+        "RWA transfer hook program is not ready. Please reconnect and try again."
+      );
       return;
     }
 
@@ -805,17 +828,17 @@ export default function FundingPoolDetailPage({
       // Derive PDAs
       const [poolPda] = PublicKey.findProgramAddressSync(
         [poolSeed, poolIdSeed],
-        program.programId,
+        program.programId
       );
 
       const [poolAuthorityPda] = PublicKey.findProgramAddressSync(
         [poolAuthoritySeed, poolIdSeed],
-        program.programId,
+        program.programId
       );
 
       const [depositorInfoPda] = PublicKey.findProgramAddressSync(
         [depositorInfoSeed, publicKey.toBuffer(), poolIdSeed],
-        program.programId,
+        program.programId
       );
 
       // Fetch pool to get RWA mint address
@@ -835,7 +858,7 @@ export default function FundingPoolDetailPage({
         poolAuthorityPda,
         true, // allowOwnerOffCurve (PDA)
         TOKEN_2022_PROGRAM_ID,
-        ASSOCIATED_TOKEN_PROGRAM_ID,
+        ASSOCIATED_TOKEN_PROGRAM_ID
       );
 
       const userRwaAta = getAssociatedTokenAddressSync(
@@ -843,12 +866,12 @@ export default function FundingPoolDetailPage({
         publicKey,
         false, // User wallet is not off-curve
         TOKEN_2022_PROGRAM_ID,
-        ASSOCIATED_TOKEN_PROGRAM_ID,
+        ASSOCIATED_TOKEN_PROGRAM_ID
       );
 
       const extraMetasAccount = getExtraAccountMetaAddress(
         rwaMint,
-        rwaProgram.programId,
+        rwaProgram.programId
       );
 
       const mintStateSeed = utils.bytes.utf8.encode("state");
@@ -856,17 +879,17 @@ export default function FundingPoolDetailPage({
 
       const [mintStatePda] = PublicKey.findProgramAddressSync(
         [mintStateSeed, rwaMint.toBuffer()],
-        rwaProgram.programId,
+        rwaProgram.programId
       );
 
       const [sourceLedgerPda] = PublicKey.findProgramAddressSync(
         [ledgerSeed, poolAuthorityPda.toBuffer(), rwaMint.toBuffer()],
-        rwaProgram.programId,
+        rwaProgram.programId
       );
 
       const [destinationLedgerPda] = PublicKey.findProgramAddressSync(
         [ledgerSeed, publicKey.toBuffer(), rwaMint.toBuffer()],
-        rwaProgram.programId,
+        rwaProgram.programId
       );
 
       const remainingAccounts: AccountMeta[] = [
@@ -954,17 +977,12 @@ export default function FundingPoolDetailPage({
     : `$${pool.fundingTarget.toLocaleString()}`;
 
   const poolProgress =
-    poolDepositLimit &&
-      poolTotalDeposited &&
-      !poolDepositLimit.isZero()
+    poolDepositLimit && poolTotalDeposited && !poolDepositLimit.isZero()
       ? (Number(
-        poolTotalDeposited
-          .mul(PRECISSION_BN)
-          .div(poolDepositLimit)
-          .toString(),
-      ) /
-        PRECISION) *
-      100
+          poolTotalDeposited.mul(PRECISSION_BN).div(poolDepositLimit).toString()
+        ) /
+          PRECISION) *
+        100
       : pool.fundingProgress;
 
   const progressPercentage = Math.max(0, Math.min(100, poolProgress));
@@ -977,12 +995,14 @@ export default function FundingPoolDetailPage({
 
   const hasRedeemableRwa = depositorInfoStats.claimableRwa.gt(new BN(0));
   const hasClaimableYield = depositorInfoStats.claimableYield.gt(new BN(0));
-  const isClaimAvailable = claimMode === "rwa" ? hasRedeemableRwa : hasClaimableYield;
-  const claimButtonLabel = claimMode === "rwa"
-    ? hasRedeemableRwa
-      ? "Redeem"
-      : "Redeem (Locked)"
-    : hasClaimableYield
+  const isClaimAvailable =
+    claimMode === "rwa" ? hasRedeemableRwa : hasClaimableYield;
+  const claimButtonLabel =
+    claimMode === "rwa"
+      ? hasRedeemableRwa
+        ? "Redeem"
+        : "Redeem (Locked)"
+      : hasClaimableYield
       ? "Claim Yield"
       : "Claim Yield (Locked)";
 
@@ -993,13 +1013,26 @@ export default function FundingPoolDetailPage({
         <section className="screen-wrapper">
           <div className="container">
             <div className="gap-32">
-              <div className="gap-16">
+              <div
+                className={`gap-16 ${animations.fadeIn(0).className}`}
+                style={animations.fadeIn(0).style}
+              >
                 <h1>{pool.name}</h1>
                 <p>{pool.description}</p>
               </div>
 
-              <div className="asset-content-wrapper grey-box border-radius-12">
-                <div className="asset-content-left">
+              <div
+                className={`asset-content-wrapper grey-box border-radius-12 ${
+                  animations.slideUp(0.1).className
+                }`}
+                style={animations.slideUp(0.1).style}
+              >
+                <div
+                  className={`asset-content-left ${
+                    animations.cardEntrance(0.2).className
+                  }`}
+                  style={animations.cardEntrance(0.2).style}
+                >
                   <div className="gap-12">
                     <Image
                       src={pool.image}
@@ -1014,8 +1047,9 @@ export default function FundingPoolDetailPage({
                         {tabs.map((tab) => (
                           <span
                             key={tab}
-                            className={`asset-tab-link ${activeTab === tab ? "asset-tab-active" : ""
-                              }`}
+                            className={`asset-tab-link ${
+                              activeTab === tab ? "asset-tab-active" : ""
+                            }`}
                             onClick={() => setActiveTab(tab)}
                             style={{ cursor: "pointer" }}
                           >
@@ -1131,7 +1165,12 @@ export default function FundingPoolDetailPage({
                   </div>
                 </div>
 
-                <div className="asset-content-right">
+                <div
+                  className={`asset-content-right ${
+                    animations.cardEntrance(0.3).className
+                  }`}
+                  style={animations.cardEntrance(0.3).style}
+                >
                   <div className="asset-sticky-info border-radius-12">
                     <span className="text-dark text-bold">
                       Investment summary
@@ -1206,20 +1245,22 @@ export default function FundingPoolDetailPage({
                         <div className="invest-header">
                           <div className="invest-tabs">
                             <span
-                              className={`invest-tab ${activeInvestTab === "Invest"
-                                ? "invest-tab-active"
-                                : ""
-                                }`}
+                              className={`invest-tab ${
+                                activeInvestTab === "Invest"
+                                  ? "invest-tab-active"
+                                  : ""
+                              }`}
                               onClick={() => setActiveInvestTab("Invest")}
                               style={{ cursor: "pointer" }}
                             >
                               Invest
                             </span>
                             <span
-                              className={`invest-tab ${activeInvestTab === "Claim"
-                                ? "invest-tab-active"
-                                : ""
-                                }`}
+                              className={`invest-tab ${
+                                activeInvestTab === "Claim"
+                                  ? "invest-tab-active"
+                                  : ""
+                              }`}
                               onClick={() => setActiveInvestTab("Claim")}
                               style={{ cursor: "pointer" }}
                             >
@@ -1261,7 +1302,8 @@ export default function FundingPoolDetailPage({
                                       alt="USDC"
                                       className="coin-icon-img"
                                       width={24}
-                                      height={24} />
+                                      height={24}
+                                    />
                                   </div>
                                   <span className="coin-symbol">USDC</span>
                                 </div>
@@ -1272,7 +1314,9 @@ export default function FundingPoolDetailPage({
                                   {connected
                                     ? isBalanceLoading
                                       ? "Loading balance..."
-                                      : `${userDepositBalance} ${usdcCoin?.symbol ?? "USDC"}`
+                                      : `${userDepositBalance} ${
+                                          usdcCoin?.symbol ?? "USDC"
+                                        }`
                                     : "0.000000 USDC"}
                                 </span>
                                 <button className="max-button">Max</button>
@@ -1284,7 +1328,8 @@ export default function FundingPoolDetailPage({
                               className="deposit-button bg-linear-green"
                               onClick={handleDeposit}
                               disabled={
-                                isDepositing || (connected && depositAmount.trim() === "")
+                                isDepositing ||
+                                (connected && depositAmount.trim() === "")
                               }
                             >
                               {connected
@@ -1296,14 +1341,21 @@ export default function FundingPoolDetailPage({
                             {depositError && (
                               <p
                                 className="text-12 text-medium"
-                                style={{ color: "#DC2626", marginTop: "0.5rem" }}
+                                style={{
+                                  color: "#DC2626",
+                                  marginTop: "0.5rem",
+                                }}
                               >
                                 {depositError}
                               </p>
                             )}
                             {depositSignature && (
-                              <p className="text-12 text-medium" style={{ marginTop: "0.5rem" }}>
-                                Deposit submitted. Signature: {shortenSignature(depositSignature)}
+                              <p
+                                className="text-12 text-medium"
+                                style={{ marginTop: "0.5rem" }}
+                              >
+                                Deposit submitted. Signature:{" "}
+                                {shortenSignature(depositSignature)}
                               </p>
                             )}
                           </>
@@ -1320,10 +1372,10 @@ export default function FundingPoolDetailPage({
                                   {isDepositorInfoLoading
                                     ? "Loading..."
                                     : `${parseTokenAmountUI(
-                                      depositorInfoStats.depositedUsdc,
-                                      depositMintDecimals,
-                                      2,
-                                    )} ${usdcCoin?.symbol ?? "USDC"}`}
+                                        depositorInfoStats.depositedUsdc,
+                                        depositMintDecimals,
+                                        2
+                                      )} ${usdcCoin?.symbol ?? "USDC"}`}
                                 </span>
                               </div>
                               <div className="claim-info-item">
@@ -1334,10 +1386,10 @@ export default function FundingPoolDetailPage({
                                   {isDepositorInfoLoading
                                     ? "Loading..."
                                     : `${parseTokenAmountUI(
-                                      depositorInfoStats.claimableRwa,
-                                      rwaMintDecimalsState,
-                                      2,
-                                    )} ${RWA_SYMBOL}`}
+                                        depositorInfoStats.claimableRwa,
+                                        rwaMintDecimalsState,
+                                        2
+                                      )} ${RWA_SYMBOL}`}
                                 </span>
                               </div>
                               <div className="claim-info-item">
@@ -1348,26 +1400,30 @@ export default function FundingPoolDetailPage({
                                   {isDepositorInfoLoading
                                     ? "Loading..."
                                     : `${parseTokenAmountUI(
-                                      depositorInfoStats.claimableYield,
-                                      depositMintDecimals,
-                                      2,
-                                    )} ${usdcCoin?.symbol ?? "USDC"}`}
+                                        depositorInfoStats.claimableYield,
+                                        depositMintDecimals,
+                                        2
+                                      )} ${usdcCoin?.symbol ?? "USDC"}`}
                                 </span>
                               </div>
                             </div>
 
                             <div className="invest-tabs claim-mode-tabs">
                               <span
-                                className={`invest-tab ${claimMode === "rwa" ? "invest-tab-active" : ""
-                                  }`}
+                                className={`invest-tab ${
+                                  claimMode === "rwa" ? "invest-tab-active" : ""
+                                }`}
                                 onClick={() => setClaimMode("rwa")}
                                 style={{ cursor: "pointer" }}
                               >
                                 Redeem CF-WIND1
                               </span>
                               <span
-                                className={`invest-tab ${claimMode === "yield" ? "invest-tab-active" : ""
-                                  }`}
+                                className={`invest-tab ${
+                                  claimMode === "yield"
+                                    ? "invest-tab-active"
+                                    : ""
+                                }`}
                                 onClick={() => setClaimMode("yield")}
                                 style={{ cursor: "pointer" }}
                               >
@@ -1402,7 +1458,9 @@ export default function FundingPoolDetailPage({
                                     <Image
                                       src={
                                         claimMode === "rwa"
-                                          ? cfWindCoin?.icon || pool?.image || "/assets/cf-wind1.avif"
+                                          ? cfWindCoin?.icon ||
+                                            pool?.image ||
+                                            "/assets/cf-wind1.avif"
                                           : usdcCoin?.icon || "/assets/usdc.png"
                                       }
                                       alt={
@@ -1412,7 +1470,8 @@ export default function FundingPoolDetailPage({
                                       }
                                       className="coin-icon-img"
                                       width={24}
-                                      height={24} />
+                                      height={24}
+                                    />
                                   </div>
                                   <span className="coin-symbol">
                                     {claimMode === "rwa"
@@ -1427,16 +1486,18 @@ export default function FundingPoolDetailPage({
                                   {isDepositorInfoLoading
                                     ? "Loading availability..."
                                     : claimMode === "rwa"
-                                      ? `${parseTokenAmountUI(
+                                    ? `${parseTokenAmountUI(
                                         depositorInfoStats.claimableRwa,
                                         rwaMintDecimalsState,
-                                        2,
+                                        2
                                       )} ${RWA_SYMBOL} available`
-                                      : `${parseTokenAmountUI(
+                                    : `${parseTokenAmountUI(
                                         depositorInfoStats.claimableYield,
                                         depositMintDecimals,
-                                        2,
-                                      )} ${usdcCoin?.symbol ?? "USDC"} available`}
+                                        2
+                                      )} ${
+                                        usdcCoin?.symbol ?? "USDC"
+                                      } available`}
                                 </span>
                                 <button
                                   className="max-button"
@@ -1448,15 +1509,15 @@ export default function FundingPoolDetailPage({
                                       setClaimRwaAmount(
                                         formatTokenAmountPlain(
                                           depositorInfoStats.claimableRwa,
-                                          rwaMintDecimalsState,
-                                        ),
+                                          rwaMintDecimalsState
+                                        )
                                       );
                                     } else {
                                       setClaimYieldAmount(
                                         formatTokenAmountPlain(
                                           depositorInfoStats.claimableYield,
-                                          depositMintDecimals,
-                                        ),
+                                          depositMintDecimals
+                                        )
                                       );
                                     }
                                   }}
@@ -1467,8 +1528,9 @@ export default function FundingPoolDetailPage({
                             </div>
 
                             <button
-                              className={`deposit-button bg-linear-green ${isClaimAvailable ? "" : "claim-button-disabled"
-                                }`}
+                              className={`deposit-button bg-linear-green ${
+                                isClaimAvailable ? "" : "claim-button-disabled"
+                              }`}
                               disabled={!isClaimAvailable || isRedeeming}
                               onClick={handleRedeem}
                             >
@@ -1486,14 +1548,21 @@ export default function FundingPoolDetailPage({
                             {redeemError && (
                               <p
                                 className="text-12 text-medium"
-                                style={{ color: "#DC2626", marginTop: "0.5rem" }}
+                                style={{
+                                  color: "#DC2626",
+                                  marginTop: "0.5rem",
+                                }}
                               >
                                 {redeemError}
                               </p>
                             )}
                             {redeemSignature && (
-                              <p className="text-12 text-medium" style={{ marginTop: "0.5rem" }}>
-                                Redeem successful! Signature: {shortenSignature(redeemSignature)}
+                              <p
+                                className="text-12 text-medium"
+                                style={{ marginTop: "0.5rem" }}
+                              >
+                                Redeem successful! Signature:{" "}
+                                {shortenSignature(redeemSignature)}
                               </p>
                             )}
                           </>

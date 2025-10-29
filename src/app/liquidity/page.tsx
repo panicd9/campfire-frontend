@@ -13,6 +13,7 @@ import {
   getFormattedLockedPercentage,
   getPooledAmount,
 } from "@/lib/data";
+import { animations } from "@/lib/animations";
 
 // Slippage Tolerance Popup Component
 const SlippageTolerancePopup = ({
@@ -406,11 +407,22 @@ export default function LiquidityPage() {
         <section className="screen-wrapper">
           <div className="container">
             <div className="gap-32">
-              <div className="gap-16">
+              <div
+                className={`gap-16 ${animations.fadeIn(0).className}`}
+                style={animations.fadeIn(0).style}
+              >
                 <h1>Liquidity</h1>
               </div>
-              <div className="swap-wrapper">
-                <div className="swap-left border-radius-12 liquidity-left">
+              <div
+                className={`swap-wrapper ${animations.slideUp(0.1).className}`}
+                style={animations.slideUp(0.1).style}
+              >
+                <div
+                  className={`swap-left border-radius-12 liquidity-left ${
+                    animations.cardEntrance(0.2).className
+                  }`}
+                  style={animations.cardEntrance(0.2).style}
+                >
                   <div className="gap-24">
                     <div className="gap-12">
                       <div className="liquidity-item border-radius-12">
@@ -570,7 +582,12 @@ export default function LiquidityPage() {
                   </div>
                 </div>
 
-                <div className="liquidity-right">
+                <div
+                  className={`liquidity-right ${
+                    animations.cardEntrance(0.3).className
+                  }`}
+                  style={animations.cardEntrance(0.3).style}
+                >
                   <div className="liquidity-right-item border-radius-12">
                     <div className="gap-24">
                       <div className="gap-6">

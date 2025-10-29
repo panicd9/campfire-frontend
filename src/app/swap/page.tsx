@@ -12,6 +12,7 @@ import {
   getTradingPairChartData,
   getChartHeaderInfo,
 } from "@/lib/data";
+import { animations } from "@/lib/animations";
 
 // Slippage Tolerance Popup Component
 const SlippageTolerancePopup = ({
@@ -516,12 +517,25 @@ export default function SwapPage() {
         <section className="screen-wrapper">
           <div className="container">
             <div className="gap-32">
-              <div className="gap-16">
+              <div
+                className={`gap-16 ${animations.fadeIn(0).className}`}
+                style={animations.fadeIn(0).style}
+              >
                 <h1>Swap</h1>
               </div>
-              <div className="grey-box border-radius-12">
+              <div
+                className={`grey-box border-radius-12 ${
+                  animations.slideUp(0.1).className
+                }`}
+                style={animations.slideUp(0.1).style}
+              >
                 <div className="swap-wrapper">
-                  <div className="swap-left border-radius-12">
+                  <div
+                    className={`swap-left border-radius-12 ${
+                      animations.cardEntrance(0.2).className
+                    }`}
+                    style={animations.cardEntrance(0.2).style}
+                  >
                     <div className="swap-header">
                       <div className="swap-pair-wrapper">
                         <div className="icons-wrapper">
@@ -561,7 +575,12 @@ export default function SwapPage() {
                     </div>
                   </div>
 
-                  <div className="swap-right border-radius-12">
+                  <div
+                    className={`swap-right border-radius-12 ${
+                      animations.cardEntrance(0.3).className
+                    }`}
+                    style={animations.cardEntrance(0.3).style}
+                  >
                     <div className="gap-12">
                       <div className="swap-item border-radius-12">
                         <div className="swap-item-header">

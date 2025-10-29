@@ -18,6 +18,7 @@ import {
   portfolioHoldings,
 } from "@/lib/data";
 import { useState } from "react";
+import { animations } from "@/lib/animations";
 
 ChartJS.register(
   CategoryScale,
@@ -152,7 +153,10 @@ export default function PortfolioCharts() {
   };
 
   return (
-    <div className="grid-2 mobile-flex">
+    <div
+      className={`grid-2 mobile-flex ${animations.cardEntrance(0.3).className}`}
+      style={animations.cardEntrance(0.3).style}
+    >
       <div className="portfolio-mid-item border-radius-12">
         <h2>Holdings</h2>
         <div className="holdings-pie-chart-wrapper" style={{ height: "300px" }}>

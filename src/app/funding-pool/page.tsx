@@ -2,7 +2,12 @@ import Navbar from "@/components/Global/Navbar";
 import Footer from "@/components/Global/Footer";
 import ProgressBar from "@/components/Global/ProgressBar";
 import { getAllFundingPools } from "@/lib/fundingPools";
-import { parseTokenAmountUI, PRECISION, PRECISSION_BN } from "../../../solana/utils";
+import {
+  parseTokenAmountUI,
+  PRECISION,
+  PRECISSION_BN,
+} from "../../../solana/utils";
+import { animations } from "@/lib/animations";
 
 export default async function FundingPoolPage() {
   const fundingPools = await getAllFundingPools();
@@ -14,16 +19,28 @@ export default async function FundingPoolPage() {
         <section className="screen-wrapper">
           <div className="container">
             <div className="gap-32">
-              <div className="gap-16">
+              <div
+                className={`gap-16 ${animations.fadeIn(0).className}`}
+                style={animations.fadeIn(0).style}
+              >
                 <h1>Funding Pool</h1>
                 <p>
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
                   do eiusmod tempor incididunt{" "}
                 </p>
               </div>
-              <div className="grid-3">
-                {fundingPools.map((pool) => (
-                  <div key={pool.id} className="funding-item border-radius-12">
+              <div
+                className={`grid-3 ${animations.slideUp(0.1).className}`}
+                style={animations.slideUp(0.1).style}
+              >
+                {fundingPools.map((pool, index) => (
+                  <div
+                    key={pool.id}
+                    className={`funding-item border-radius-12 ${
+                      animations.cardEntrance(0.2 + index * 0.1).className
+                    }`}
+                    style={animations.cardEntrance(0.2 + index * 0.1).style}
+                  >
                     <div className="gap-16">
                       <img
                         src={pool.image}
@@ -49,7 +66,12 @@ export default async function FundingPoolPage() {
                         <ProgressBar
                           progress={
                             pool.chainData
-                              ? pool.chainData.totalDeposited.mul(PRECISSION_BN).div(pool.chainData.depositLimit).toNumber() / PRECISION * 100
+                              ? (pool.chainData.totalDeposited
+                                  .mul(PRECISSION_BN)
+                                  .div(pool.chainData.depositLimit)
+                                  .toNumber() /
+                                  PRECISION) *
+                                100
                               : pool.fundingProgress
                           }
                           label="Funding Progress"
@@ -60,18 +82,28 @@ export default async function FundingPoolPage() {
                             <span className="text-12">Funding Target</span>
                             <span className="text-black">
                               {pool.chainData
-                                ? `${parseTokenAmountUI(pool.chainData.depositLimit, 6, 0)} ${pool.currency}`
-                                : `${pool.fundingTarget.toLocaleString()} ${pool.currency}`
-                              }
+                                ? `${parseTokenAmountUI(
+                                    pool.chainData.depositLimit,
+                                    6,
+                                    0
+                                  )} ${pool.currency}`
+                                : `${pool.fundingTarget.toLocaleString()} ${
+                                    pool.currency
+                                  }`}
                             </span>
                           </div>
                           <div className="grey-item border-radius-12">
                             <span className="text-12">Raised</span>
                             <span className="text-black">
                               {pool.chainData
-                                ? `${parseTokenAmountUI(pool.chainData.totalDeposited, 6, 0)} ${pool.currency}`
-                                : `${pool.fundingRaised.toLocaleString()} ${pool.currency}`
-                              }
+                                ? `${parseTokenAmountUI(
+                                    pool.chainData.totalDeposited,
+                                    6,
+                                    0
+                                  )} ${pool.currency}`
+                                : `${pool.fundingRaised.toLocaleString()} ${
+                                    pool.currency
+                                  }`}
                             </span>
                           </div>
                         </div>
