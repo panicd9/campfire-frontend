@@ -32,7 +32,7 @@ export type RwaTransferHook = {
           "signer": true
         },
         {
-          "name": "mint"
+          "name": "rwaMint"
         },
         {
           "name": "mintState",
@@ -51,7 +51,7 @@ export type RwaTransferHook = {
               },
               {
                 "kind": "account",
-                "path": "mint"
+                "path": "rwaMint"
               }
             ]
           }
@@ -82,7 +82,7 @@ export type RwaTransferHook = {
               },
               {
                 "kind": "account",
-                "path": "mint"
+                "path": "rwaMint"
               }
             ]
           }
@@ -104,7 +104,7 @@ export type RwaTransferHook = {
               },
               {
                 "kind": "account",
-                "path": "mint"
+                "path": "rwaMint"
               }
             ]
           }
@@ -118,10 +118,66 @@ export type RwaTransferHook = {
         {
           "name": "claimantYieldAta",
           "writable": true,
-          "signer": true
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "claimant"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "yieldMint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
           "name": "tokenProgram"
+        },
+        {
+          "name": "associatedTokenProgram",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
           "name": "systemProgram",
@@ -461,10 +517,11 @@ export type RwaTransferHook = {
       "accounts": [
         {
           "name": "authority",
+          "writable": true,
           "signer": true
         },
         {
-          "name": "mint"
+          "name": "rwaMint"
         },
         {
           "name": "mintState",
@@ -483,10 +540,50 @@ export type RwaTransferHook = {
               },
               {
                 "kind": "account",
-                "path": "mint"
+                "path": "rwaMint"
               }
             ]
           }
+        },
+        {
+          "name": "authorityUsdcTokenAccount",
+          "writable": true
+        },
+        {
+          "name": "usdcMint"
+        },
+        {
+          "name": "vaultUsdcTokenAccount",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "rwaMint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "tokenProgram"
+        },
+        {
+          "name": "associatedTokenProgram",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [

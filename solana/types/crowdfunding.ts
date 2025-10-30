@@ -597,7 +597,8 @@ export type Crowdfunding = {
           "name": "transferHookProgram"
         },
         {
-          "name": "extraAccountMetas"
+          "name": "extraAccountMetas",
+          "writable": true
         },
         {
           "name": "systemProgram",
@@ -904,15 +905,53 @@ export type Crowdfunding = {
   "errors": [
     {
       "code": 6000,
-      "name": "zeroDeltaIndex"
+      "name": "unauthorizedAdmin",
+      "msg": "Only the configured admin can perform this action"
     },
     {
       "code": 6001,
-      "name": "overflow"
+      "name": "mathOverflow",
+      "msg": "Math overflow"
     },
     {
       "code": 6002,
-      "name": "unauthorized"
+      "name": "invalidAmount",
+      "msg": "Invalid amount"
+    },
+    {
+      "code": 6003,
+      "name": "alreadyIssued",
+      "msg": "RWA already issued for this pool"
+    },
+    {
+      "code": 6004,
+      "name": "notIssued",
+      "msg": "RWA not yet issued"
+    },
+    {
+      "code": 6005,
+      "name": "invalidRwaMint",
+      "msg": "Invalid RWA mint for this pool"
+    },
+    {
+      "code": 6006,
+      "name": "invalidDepositMint",
+      "msg": "Invalid deposit mint for this pool"
+    },
+    {
+      "code": 6007,
+      "name": "nothingToClaim",
+      "msg": "Nothing to claim"
+    },
+    {
+      "code": 6008,
+      "name": "depositsClosed",
+      "msg": "Deposits are closed after issuance"
+    },
+    {
+      "code": 6009,
+      "name": "poolIdMismatch",
+      "msg": "Pool id does not match account seed"
     }
   ],
   "types": [

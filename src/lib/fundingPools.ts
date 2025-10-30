@@ -124,7 +124,7 @@ export const fundingPools: FundingPool[] = [
       projectedAnnually: "11.5% APY",
       duration: "25 Years",
       beingRaised: 6000000,
-      instalments: "Daily Monthly",
+      instalments: "Daily",
       description: "Campfire has agreed to purchase a 40% stake in ESBs Ballybrack wind farm located in county Galway. This asset went live in 2020 and has approx 25 years left on the manufacturers lifespan.",
       payoutDate: "First investor payout expected 1st February 2025"
     }

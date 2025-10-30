@@ -1,6 +1,6 @@
 import { BN } from "@coral-xyz/anchor";
 
-export const PRECISION = 10 ** 9;
+export const PRECISION = 10 ** 12;
 export const PRECISSION_BN = new BN(PRECISION);
 
 /**

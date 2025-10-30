@@ -591,7 +591,8 @@
           "name": "transfer_hook_program"
         },
         {
-          "name": "extra_account_metas"
+          "name": "extra_account_metas",
+          "writable": true
         },
         {
           "name": "system_program",
@@ -898,15 +899,53 @@
   "errors": [
     {
       "code": 6000,
-      "name": "ZeroDeltaIndex"
+      "name": "UnauthorizedAdmin",
+      "msg": "Only the configured admin can perform this action"
     },
     {
       "code": 6001,
-      "name": "Overflow"
+      "name": "MathOverflow",
+      "msg": "Math overflow"
     },
     {
       "code": 6002,
-      "name": "Unauthorized"
+      "name": "InvalidAmount",
+      "msg": "Invalid amount"
+    },
+    {
+      "code": 6003,
+      "name": "AlreadyIssued",
+      "msg": "RWA already issued for this pool"
+    },
+    {
+      "code": 6004,
+      "name": "NotIssued",
+      "msg": "RWA not yet issued"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidRwaMint",
+      "msg": "Invalid RWA mint for this pool"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidDepositMint",
+      "msg": "Invalid deposit mint for this pool"
+    },
+    {
+      "code": 6007,
+      "name": "NothingToClaim",
+      "msg": "Nothing to claim"
+    },
+    {
+      "code": 6008,
+      "name": "DepositsClosed",
+      "msg": "Deposits are closed after issuance"
+    },
+    {
+      "code": 6009,
+      "name": "PoolIdMismatch",
+      "msg": "Pool id does not match account seed"
     }
   ],
   "types": [
