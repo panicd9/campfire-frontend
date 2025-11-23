@@ -1991,7 +1991,23 @@ button {
   background: rgb(from var(--Text-Dark) r g b / 90%);
 }
 
-/* Invest Section Styles */
+/* Invest Section Styles - Updated for three separate sections */
+.sidebar-section {
+  padding-top: 24px;
+  border-top: 1px solid rgb(from var(--Text-Dark) r g b / 10%);
+}
+
+.sidebar-section:first-of-type {
+  padding-top: 24px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
 .invest-section {
   padding-top: 24px;
   border-top: 1px solid rgb(from var(--Text-Dark) r g b / 10%);
@@ -2155,6 +2171,31 @@ button {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Holdings Section Styles */
+.holdings-info-section {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.holdings-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.holdings-info-item:last-child {
+  margin-bottom: 0;
+}
+
+.holdings-info-item> :last-child {
+  white-space: nowrap;
+  word-break: normal;
 }
 
 .claim-info-item {

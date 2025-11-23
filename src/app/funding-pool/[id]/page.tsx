@@ -145,7 +145,6 @@ export default function FundingPoolDetailPage({
   params,
 }: FundingPoolPageProps) {
   const [activeTab, setActiveTab] = useState("Overview");
-  const [activeInvestTab, setActiveInvestTab] = useState("Invest");
   const [initialInvestment, setInitialInvestment] = useState(5000);
   const [investmentDuration, setInvestmentDuration] = useState(3);
   const [depositAmount, setDepositAmount] = useState("");
@@ -1155,14 +1154,6 @@ export default function FundingPoolDetailPage({
   const hasClaimableYield = depositorInfoStats.claimableYield.gt(new BN(0));
   const isClaimAvailable =
     claimMode === "rwa" ? hasRedeemableRwa : hasClaimableYield;
-  const claimButtonLabel =
-    claimMode === "rwa"
-      ? hasRedeemableRwa
-        ? "Redeem"
-        : "Redeem (Locked)"
-      : hasClaimableYield
-        ? "Claim Yield"
-        : "Claim Yield (Locked)";
 
   return (
     <div className="page-wrapper">
@@ -1369,322 +1360,354 @@ export default function FundingPoolDetailPage({
                         </span>
                       </div>
 
-                      {/* Invest/Claim Section */}
-                      <div className="invest-section">
-                        <div className="invest-header">
-                          <div className="invest-tabs">
-                            <span
-                              className={`invest-tab ${activeInvestTab === "Invest"
-                                  ? "invest-tab-active"
-                                  : ""
-                                }`}
-                              onClick={() => setActiveInvestTab("Invest")}
-                              style={{ cursor: "pointer" }}
-                            >
-                              Invest
-                            </span>
-                            <span
-                              className={`invest-tab ${activeInvestTab === "Claim"
-                                  ? "invest-tab-active"
-                                  : ""
-                                }`}
-                              onClick={() => setActiveInvestTab("Claim")}
-                              style={{ cursor: "pointer" }}
-                            >
-                              Redeem & Claim
-                            </span>
-                          </div>
-                          {activeInvestTab === "Invest" && (
-                            <span className="text-14 text-medium">
-                              Min: 1 USDC
-                            </span>
-                          )}
+                      {/* 1. INVEST SECTION - Always on top */}
+                      <div className="sidebar-section">
+                        <div className="section-header">
+                          <span className="text-16 text-bold text-dark">Invest</span>
+                          <span className="text-14 text-medium">Min: 1 USDC</span>
                         </div>
 
-                        {activeInvestTab === "Invest" && (
-                          <>
-                            <div className="invest-input-section">
-                              <div className="invest-input-wrapper">
-                                <input
-                                  type="number"
-                                  step="0.01"
-                                  min="1"
-                                  value={depositAmount}
-                                  onChange={(e) => {
-                                    setDepositAmount(e.target.value);
-                                    if (depositError) {
-                                      setDepositError(null);
-                                    }
-                                    if (depositSignature) {
-                                      setDepositSignature(null);
-                                    }
-                                  }}
-                                  placeholder="0.00"
-                                  className="invest-amount-input"
-                                />
-                                <div className="coin-selector-invest">
-                                  <div className="coin-icon-wrapper">
-                                    <img
-                                      src={usdcCoin?.icon || "/assets/usdc.png"}
-                                      alt="USDC"
-                                      className="coin-icon-img"
-                                    />
-                                  </div>
-                                  <span className="coin-symbol">USDC</span>
-                                </div>
-                              </div>
-
-                              <div className="balance-info">
-                                <span className="balance-text">
-                                  {connected
-                                    ? isBalanceLoading
-                                      ? "Loading balance..."
-                                      : `${userDepositBalance} ${usdcCoin?.symbol ?? "USDC"
-                                      }`
-                                    : "0.000000 USDC"}
-                                </span>
-                                <button className="max-button">Max</button>
-                              </div>
-                            </div>
-
-                            <button
-                              type="button"
-                              className="deposit-button bg-linear-green"
-                              onClick={handleDeposit}
-                              disabled={
-                                isDepositing ||
-                                (connected && depositAmount.trim() === "")
-                              }
-                            >
-                              {connected
-                                ? isDepositing
-                                  ? "Depositing..."
-                                  : "Deposit"
-                                : "Connect Wallet"}
-                            </button>
-                            {depositError && (
-                              <p
-                                className="text-12 text-medium"
-                                style={{
-                                  color: "#DC2626",
-                                  marginTop: "0.5rem",
-                                }}
-                              >
-                                {depositError}
-                              </p>
-                            )}
-                            {depositSignature && (
-                              <p
-                                className="text-12 text-medium"
-                                style={{ marginTop: "0.5rem" }}
-                              >
-                                Deposit submitted. Signature:{" "}
-                                {shortenSignature(depositSignature)}
-                              </p>
-                            )}
-                          </>
-                        )}
-
-                        {activeInvestTab === "Claim" && (
-                          <>
-                            <div className="claim-info-section">
-                              <div className="claim-info-item">
-                                <span className="text-14 text-medium">
-                                  Invested
-                                </span>
-                                <span className="text-14 text-bold text-dark">
-                                  {isDepositorInfoLoading
-                                    ? "Loading..."
-                                    : `${parseTokenAmountUI(
-                                      depositorInfoStats.depositedUsdc,
-                                      depositMintDecimals,
-                                      2
-                                    )} ${usdcCoin?.symbol ?? "USDC"}`}
-                                </span>
-                              </div>
-                              <div className="claim-info-item">
-                                <span className="text-14 text-medium">
-                                  Redeemable CF-WIND1
-                                </span>
-                                <span className="text-14 text-bold text-dark">
-                                  {isDepositorInfoLoading
-                                    ? "Loading..."
-                                    : `${parseTokenAmountUI(
-                                      depositorInfoStats.claimableRwa,
-                                      rwaMintDecimalsState,
-                                      2
-                                    )} ${RWA_SYMBOL}`}
-                                </span>
-                              </div>
-                              <div className="claim-info-item">
-                                <span className="text-14 text-medium">
-                                  Claimable Yield (USDC)
-                                </span>
-                                <span className="text-14 text-bold text-green">
-                                  {isDepositorInfoLoading
-                                    ? "Loading..."
-                                    : `${depositorInfoStats.claimableYield.gt(new BN(0))
-                                      ? parseTokenAmountUI(
-                                        depositorInfoStats.claimableYield,
-                                        depositMintDecimals,
-                                        2
-                                      )
-                                      : "0.00"
-                                    } ${usdcCoin?.symbol ?? "USDC"}`}
-                                </span>
-                              </div>
-                            </div>
-
-                            <div className="invest-tabs claim-mode-tabs">
-                              <span
-                                className={`invest-tab ${claimMode === "rwa" ? "invest-tab-active" : ""
-                                  }`}
-                                onClick={() => setClaimMode("rwa")}
-                                style={{ cursor: "pointer" }}
-                              >
-                                Redeem CF-WIND1
-                              </span>
-                              <span
-                                className={`invest-tab ${claimMode === "yield"
-                                    ? "invest-tab-active"
-                                    : ""
-                                  }`}
-                                onClick={() => setClaimMode("yield")}
-                                style={{ cursor: "pointer" }}
-                              >
-                                Claim Yield (USDC)
-                              </span>
-                            </div>
-
-                            <div className="invest-input-section">
-                              <div className="invest-input-wrapper">
-                                <input
-                                  type="number"
-                                  step="0.01"
-                                  min="0.01"
-                                  value={
-                                    claimMode === "rwa"
-                                      ? claimRwaAmount
-                                      : claimYieldAmount
-                                  }
-                                  onChange={(e) => {
-                                    const nextValue = e.target.value;
-                                    if (claimMode === "rwa") {
-                                      setClaimRwaAmount(nextValue);
-                                    } else {
-                                      setClaimYieldAmount(nextValue);
-                                    }
-                                  }}
-                                  placeholder="0.00"
-                                  className="invest-amount-input"
-                                />
-                                <div className="coin-selector-invest">
-                                  <div className="coin-icon-wrapper">
-                                    <img
-                                      src={
-                                        claimMode === "rwa"
-                                          ? cfWindCoin?.icon ||
-                                          pool?.image ||
-                                          "/assets/cf-wind1.avif"
-                                          : usdcCoin?.icon || "/assets/usdc.png"
-                                      }
-                                      alt={
-                                        claimMode === "rwa"
-                                          ? cfWindCoin?.symbol ?? RWA_SYMBOL
-                                          : usdcCoin?.symbol ?? "USDC"
-                                      }
-                                      className="coin-icon-img"
-                                    />
-                                  </div>
-                                  <span className="coin-symbol">
-                                    {claimMode === "rwa"
-                                      ? RWA_SYMBOL
-                                      : usdcCoin?.symbol ?? "USDC"}
-                                  </span>
-                                </div>
-                              </div>
-
-                              <div className="balance-info">
-                                <span className="balance-text">
-                                  {isDepositorInfoLoading
-                                    ? "Loading availability..."
-                                    : claimMode === "rwa"
-                                      ? `${parseTokenAmountUI(
-                                        depositorInfoStats.claimableRwa,
-                                        rwaMintDecimalsState,
-                                        2
-                                      )} ${RWA_SYMBOL} available`
-                                      : `${parseTokenAmountUI(
-                                        depositorInfoStats.claimableYield,
-                                        depositMintDecimals,
-                                        2
-                                      )} ${usdcCoin?.symbol ?? "USDC"
-                                      } available`}
-                                </span>
-                                <button
-                                  className="max-button"
-                                  onClick={() => {
-                                    if (isDepositorInfoLoading) {
-                                      return;
-                                    }
-                                    if (claimMode === "rwa") {
-                                      setClaimRwaAmount(
-                                        formatTokenAmountPlain(
-                                          depositorInfoStats.claimableRwa,
-                                          rwaMintDecimalsState
-                                        )
-                                      );
-                                    } else {
-                                      setClaimYieldAmount(
-                                        formatTokenAmountPlain(
-                                          depositorInfoStats.claimableYield,
-                                          depositMintDecimals
-                                        )
-                                      );
-                                    }
-                                  }}
-                                >
-                                  Max
-                                </button>
-                              </div>
-                            </div>
-
-                            <button
-                              className={`deposit-button bg-linear-green ${isClaimAvailable ? "" : "claim-button-disabled"
-                                }`}
-                              disabled={!isClaimAvailable || isRedeeming}
-                              onClick={handleRedeem}
-                            >
-                              {!isClaimAvailable && (
+                        <div className="invest-input-section">
+                          <div className="invest-input-wrapper">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="1"
+                              value={depositAmount}
+                              onChange={(e) => {
+                                setDepositAmount(e.target.value);
+                                if (depositError) {
+                                  setDepositError(null);
+                                }
+                                if (depositSignature) {
+                                  setDepositSignature(null);
+                                }
+                              }}
+                              placeholder="0.00"
+                              className="invest-amount-input"
+                            />
+                            <div className="coin-selector-invest">
+                              <div className="coin-icon-wrapper">
                                 <img
-                                  src="/assets/Locked.svg"
-                                  alt="Locked"
-                                  className="claim-button-icon"
+                                  src={usdcCoin?.icon || "/assets/usdc.png"}
+                                  alt="USDC"
+                                  className="coin-icon-img"
                                 />
-                              )}
-                              {isRedeeming ? "Redeeming..." : claimButtonLabel}
+                              </div>
+                              <span className="coin-symbol">USDC</span>
+                            </div>
+                          </div>
+
+                          <div className="balance-info">
+                            <span className="balance-text">
+                              {connected
+                                ? isBalanceLoading
+                                  ? "Loading balance..."
+                                  : `${userDepositBalance} ${usdcCoin?.symbol ?? "USDC"
+                                  }`
+                                : "0.000000 USDC"}
+                            </span>
+                            <button className="max-button">Max</button>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="deposit-button bg-linear-green"
+                          onClick={handleDeposit}
+                          disabled={
+                            isDepositing ||
+                            (connected && depositAmount.trim() === "")
+                          }
+                        >
+                          {connected
+                            ? isDepositing
+                              ? "Depositing..."
+                              : "Invest Now"
+                            : "Connect Wallet"}
+                        </button>
+                        {depositError && (
+                          <p
+                            className="text-12 text-medium"
+                            style={{
+                              color: "#DC2626",
+                              marginTop: "0.5rem",
+                            }}
+                          >
+                            {depositError}
+                          </p>
+                        )}
+                        {depositSignature && (
+                          <p
+                            className="text-12 text-medium"
+                            style={{ marginTop: "0.5rem" }}
+                          >
+                            Deposit submitted. Signature:{" "}
+                            {shortenSignature(depositSignature)}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* 2. HOLDINGS SECTION - Redeem */}
+                      <div className="sidebar-section">
+                        <div className="section-header">
+                          <span className="text-16 text-bold text-dark">Holdings</span>
+                        </div>
+
+                        <div className="holdings-info-section">
+                          <div className="holdings-info-item">
+                            <span className="text-14 text-medium">
+                              Invested
+                            </span>
+                            <span className="text-14 text-bold text-dark">
+                              {isDepositorInfoLoading
+                                ? "Loading..."
+                                : `${parseTokenAmountUI(
+                                  depositorInfoStats.depositedUsdc,
+                                  depositMintDecimals,
+                                  2
+                                )} ${usdcCoin?.symbol ?? "USDC"}`}
+                            </span>
+                          </div>
+                          <div className="holdings-info-item">
+                            <span className="text-14 text-medium">
+                              Redeemable
+                            </span>
+                            <span className="text-14 text-bold text-dark">
+                              {isDepositorInfoLoading
+                                ? "Loading..."
+                                : `${parseTokenAmountUI(
+                                  depositorInfoStats.claimableRwa,
+                                  rwaMintDecimalsState,
+                                  2
+                                )} ${RWA_SYMBOL}`}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="invest-input-section">
+                          <div className="invest-input-wrapper">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0.01"
+                              value={claimRwaAmount}
+                              onChange={(e) => {
+                                setClaimRwaAmount(e.target.value);
+                              }}
+                              placeholder="0.00"
+                              className="invest-amount-input"
+                            />
+                            <div className="coin-selector-invest">
+                              <div className="coin-icon-wrapper">
+                                <img
+                                  src={
+                                    cfWindCoin?.icon ||
+                                    pool?.image ||
+                                    "/assets/cf-wind1.avif"
+                                  }
+                                  alt={cfWindCoin?.symbol ?? RWA_SYMBOL}
+                                  className="coin-icon-img"
+                                />
+                              </div>
+                              <span className="coin-symbol">{RWA_SYMBOL}</span>
+                            </div>
+                          </div>
+
+                          <div className="balance-info">
+                            <span className="balance-text">
+                              {isDepositorInfoLoading
+                                ? "Loading availability..."
+                                : `${parseTokenAmountUI(
+                                  depositorInfoStats.claimableRwa,
+                                  rwaMintDecimalsState,
+                                  2
+                                )} ${RWA_SYMBOL} available`}
+                            </span>
+                            <button
+                              className="max-button"
+                              onClick={() => {
+                                if (isDepositorInfoLoading) {
+                                  return;
+                                }
+                                setClaimRwaAmount(
+                                  formatTokenAmountPlain(
+                                    depositorInfoStats.claimableRwa,
+                                    rwaMintDecimalsState
+                                  )
+                                );
+                              }}
+                            >
+                              Max
                             </button>
-                            {redeemError && (
-                              <p
-                                className="text-12 text-medium"
-                                style={{
-                                  color: "#DC2626",
-                                  marginTop: "0.5rem",
-                                }}
-                              >
-                                {redeemError}
-                              </p>
-                            )}
-                            {redeemSignature && (
-                              <p
-                                className="text-12 text-medium"
-                                style={{ marginTop: "0.5rem" }}
-                              >
-                                Redeem successful! Signature:{" "}
-                                {shortenSignature(redeemSignature)}
-                              </p>
-                            )}
-                          </>
+                          </div>
+                        </div>
+
+                        <button
+                          className={`deposit-button bg-linear-green ${isClaimAvailable ? "" : "claim-button-disabled"
+                            }`}
+                          disabled={!isClaimAvailable || isRedeeming || claimMode !== "rwa"}
+                          onClick={() => {
+                            setClaimMode("rwa");
+                            handleRedeem();
+                          }}
+                        >
+                          {!isClaimAvailable && (
+                            <img
+                              src="/assets/Locked.svg"
+                              alt="Locked"
+                              className="claim-button-icon"
+                            />
+                          )}
+                          {isRedeeming && claimMode === "rwa" ? "Redeeming..." : "Redeem Tokens"}
+                        </button>
+                        {redeemError && claimMode === "rwa" && (
+                          <p
+                            className="text-12 text-medium"
+                            style={{
+                              color: "#DC2626",
+                              marginTop: "0.5rem",
+                            }}
+                          >
+                            {redeemError}
+                          </p>
+                        )}
+                        {redeemSignature && claimMode === "rwa" && (
+                          <p
+                            className="text-12 text-medium"
+                            style={{ marginTop: "0.5rem" }}
+                          >
+                            Redeem successful! Signature:{" "}
+                            {shortenSignature(redeemSignature)}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* 3. EARNINGS SECTION - Claim Yield */}
+                      <div className="sidebar-section">
+                        <div className="section-header">
+                          <span className="text-16 text-bold text-dark">Earnings</span>
+                        </div>
+
+                        <div className="holdings-info-section">
+                          <div className="holdings-info-item">
+                            <span className="text-14 text-medium">
+                              Claimable Yield
+                            </span>
+                            <span className="text-14 text-bold text-green">
+                              {isDepositorInfoLoading
+                                ? "Loading..."
+                                : `${depositorInfoStats.claimableYield.gt(new BN(0))
+                                  ? parseTokenAmountUI(
+                                    depositorInfoStats.claimableYield,
+                                    depositMintDecimals,
+                                    2
+                                  )
+                                  : "0.00"
+                                } ${usdcCoin?.symbol ?? "USDC"}`}
+                            </span>
+                          </div>
+                          <div className="holdings-info-item">
+                            <span className="text-14 text-medium">
+                              Next Payout
+                            </span>
+                            <span className="text-14 text-bold text-dark">
+                              {pool.summary.payoutDate || "TBA"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="invest-input-section">
+                          <div className="invest-input-wrapper">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0.01"
+                              value={claimYieldAmount}
+                              onChange={(e) => {
+                                setClaimYieldAmount(e.target.value);
+                              }}
+                              placeholder="0.00"
+                              className="invest-amount-input"
+                            />
+                            <div className="coin-selector-invest">
+                              <div className="coin-icon-wrapper">
+                                <img
+                                  src={usdcCoin?.icon || "/assets/usdc.png"}
+                                  alt={usdcCoin?.symbol ?? "USDC"}
+                                  className="coin-icon-img"
+                                />
+                              </div>
+                              <span className="coin-symbol">{usdcCoin?.symbol ?? "USDC"}</span>
+                            </div>
+                          </div>
+
+                          <div className="balance-info">
+                            <span className="balance-text">
+                              {isDepositorInfoLoading
+                                ? "Loading availability..."
+                                : `${parseTokenAmountUI(
+                                  depositorInfoStats.claimableYield,
+                                  depositMintDecimals,
+                                  2
+                                )} ${usdcCoin?.symbol ?? "USDC"} available`}
+                            </span>
+                            <button
+                              className="max-button"
+                              onClick={() => {
+                                if (isDepositorInfoLoading) {
+                                  return;
+                                }
+                                setClaimYieldAmount(
+                                  formatTokenAmountPlain(
+                                    depositorInfoStats.claimableYield,
+                                    depositMintDecimals
+                                  )
+                                );
+                              }}
+                            >
+                              Max
+                            </button>
+                          </div>
+                        </div>
+
+                        <button
+                          className={`deposit-button bg-linear-green ${isClaimAvailable ? "" : "claim-button-disabled"
+                            }`}
+                          disabled={!isClaimAvailable || isRedeeming || claimMode !== "yield"}
+                          onClick={() => {
+                            setClaimMode("yield");
+                            handleRedeem();
+                          }}
+                        >
+                          {!isClaimAvailable && (
+                            <img
+                              src="/assets/Locked.svg"
+                              alt="Locked"
+                              className="claim-button-icon"
+                            />
+                          )}
+                          {isRedeeming && claimMode === "yield" ? "Claiming..." : "Claim Yield"}
+                        </button>
+                        {redeemError && claimMode === "yield" && (
+                          <p
+                            className="text-12 text-medium"
+                            style={{
+                              color: "#DC2626",
+                              marginTop: "0.5rem",
+                            }}
+                          >
+                            {redeemError}
+                          </p>
+                        )}
+                        {redeemSignature && claimMode === "yield" && (
+                          <p
+                            className="text-12 text-medium"
+                            style={{ marginTop: "0.5rem" }}
+                          >
+                            Claim successful! Signature:{" "}
+                            {shortenSignature(redeemSignature)}
+                          </p>
                         )}
                       </div>
                     </div>
